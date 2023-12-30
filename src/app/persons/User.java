@@ -1,0 +1,46 @@
+package app.persons;
+
+import fileio.input.UserInput;
+import lombok.Getter;
+import lombok.Setter;
+import main.Command;
+
+@Getter @Setter
+public abstract class User {
+    private String username;
+    private int age;
+    private String city;
+
+    public User(final Command command) {
+        username = command.getUsername();
+        age = command.getAge();
+        city = command.getCity();
+    }
+
+    public User(final UserInput input) {
+        this.username = input.getUsername();
+        this.age = input.getAge();
+        this.city = input.getCity();
+    }
+
+    /**
+     * @return true if the user can switch connection status
+     */
+    public abstract boolean canSwitchConnectionStatus();
+
+    /**
+     * @return true if the User can add artist items
+     */
+    public abstract boolean canAddArtistItems();
+
+    /**
+     * @return true if the User can add host items
+     */
+    public abstract boolean canAddHostItems();
+
+    /**
+     * @param command the given command
+     * @return a string informing whether the delete was successful
+     */
+    public abstract String delete(Command command);
+}
