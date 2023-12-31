@@ -3,6 +3,7 @@ package main;
 import app.audio.LibrarySingleton;
 import checker.Checker;
 import checker.CheckerConstants;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -70,6 +71,7 @@ public final class Main {
     public static void action(final String filePath1,
                               final String filePath2) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         LibraryInput library = objectMapper.readValue(new File(CheckerConstants.TESTS_PATH
                     + "library/library.json"), LibraryInput.class);
         LibrarySingleton myLibrary = LibrarySingleton.getInstance();

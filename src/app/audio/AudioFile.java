@@ -9,7 +9,7 @@ public abstract class AudioFile {
     protected int duration;
 
     /**
-     * @return true if it a song
+     * @return true if it is a song
      */
     public abstract boolean isSong();
 }

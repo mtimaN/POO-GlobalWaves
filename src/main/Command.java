@@ -51,158 +51,111 @@ public final class Command {
         Listener listener;
         Artist artist;
         switch (command) {
-            case "search":
+            case "search" -> {
                 if (currentPlayer.getUser() == null) {
                     break;
                 }
                 currentPlayer.setSearchBar(new SearchBar(this));
                 currentPlayer.emptyPlayer(this);
                 outputs.add(objectMapper.valueToTree(currentPlayer.getSearchBar().search(this)));
-                break;
-            case "select":
+            }
+            case "select" -> {
                 outputs.add(objectMapper.valueToTree(currentPlayer.getSearchBar().select(this)));
                 if (currentPlayer.getSearchBar().getSelection() != null
                         && !currentPlayer.getSearchBar().getSelection().isPlayable()) {
                     currentPlayer.changePageOwner();
                 }
-                break;
-            case "load":
-                outputs.add(objectMapper.valueToTree(currentPlayer.load(this)));
-                break;
-            case "playPause":
-                outputs.add(objectMapper.valueToTree(currentPlayer.playPause(this)));
-                break;
-            case "status":
-                outputs.add(objectMapper.valueToTree(currentPlayer.status(this)));
-                break;
-            case "createPlaylist":
-                outputs.add(objectMapper.valueToTree(Playlist.create(this)));
-                break;
-            case "addRemoveInPlaylist":
-                outputs.add(objectMapper.valueToTree(currentPlayer.addRemoveInPlaylist(this)));
-                break;
-            case "like":
-                outputs.add(objectMapper.valueToTree(currentPlayer.like(this)));
-                break;
-            case "showPreferredSongs":
+            }
+            case "load" -> outputs.add(objectMapper.valueToTree(currentPlayer.load(this)));
+            case "playPause" ->
+                    outputs.add(objectMapper.valueToTree(currentPlayer.playPause(this)));
+            case "status" -> outputs.add(objectMapper.valueToTree(currentPlayer.status(this)));
+            case "createPlaylist" -> outputs.add(objectMapper.valueToTree(Playlist.create(this)));
+            case "addRemoveInPlaylist" ->
+                    outputs.add(objectMapper.valueToTree(currentPlayer.addRemoveInPlaylist(this)));
+            case "like" -> outputs.add(objectMapper.valueToTree(currentPlayer.like(this)));
+            case "showPreferredSongs" -> {
                 listener = myLibrary.findListenerByUsername(this.getUsername());
                 if (listener == null) {
                     break;
                 }
                 outputs.add(objectMapper.valueToTree(listener.showPreferredSongs(this)));
-                break;
-            case "showPlaylists":
+            }
+            case "showPlaylists" -> {
                 listener = myLibrary.findListenerByUsername(this.getUsername());
                 assert listener != null;
                 outputs.add(objectMapper.valueToTree(listener.showPlaylists(this)));
-                break;
-            case "repeat":
-                outputs.add(objectMapper.valueToTree(currentPlayer.repeat(this)));
-                break;
-            case "shuffle":
-                outputs.add(objectMapper.valueToTree(currentPlayer.shuffle(this)));
-                break;
-            case "forward":
-                outputs.add(objectMapper.valueToTree(currentPlayer.forward(this)));
-                break;
-            case "backward":
-                outputs.add(objectMapper.valueToTree(currentPlayer.backward(this)));
-                break;
-            case "next":
-                outputs.add(objectMapper.valueToTree(currentPlayer.next(this)));
-                break;
-            case "prev":
-                outputs.add(objectMapper.valueToTree(currentPlayer.prev(this)));
-                break;
-            case "follow":
-                outputs.add(objectMapper.valueToTree(currentPlayer.follow(this)));
-                break;
-            case "switchVisibility":
+            }
+            case "repeat" -> outputs.add(objectMapper.valueToTree(currentPlayer.repeat(this)));
+            case "shuffle" -> outputs.add(objectMapper.valueToTree(currentPlayer.shuffle(this)));
+            case "forward" -> outputs.add(objectMapper.valueToTree(currentPlayer.forward(this)));
+            case "backward" -> outputs.add(objectMapper.valueToTree(currentPlayer.backward(this)));
+            case "next" -> outputs.add(objectMapper.valueToTree(currentPlayer.next(this)));
+            case "prev" -> outputs.add(objectMapper.valueToTree(currentPlayer.prev(this)));
+            case "follow" -> outputs.add(objectMapper.valueToTree(currentPlayer.follow(this)));
+            case "switchVisibility" -> {
                 listener = myLibrary.findListenerByUsername(this.getUsername());
                 if (listener == null) {
                     break;
                 }
                 outputs.add(objectMapper.valueToTree(listener.switchVisibility(this)));
-                break;
-            case "getTop5Songs":
-                outputs.add(objectMapper.valueToTree(myLibrary.getTop5Songs(this)));
-                break;
-            case "getTop5Playlists":
-                outputs.add(objectMapper.valueToTree(myLibrary.getTop5Playlists(this)));
-                break;
-            case "getTop5Artists":
-                outputs.add(objectMapper.valueToTree(myLibrary.getTop5Artists(this)));
-                break;
-            case "switchConnectionStatus":
-                outputs.add(objectMapper.valueToTree(currentPlayer.switchConnectionStatus(this)));
-                break;
-            case "getAllUsers":
-                outputs.add(objectMapper.valueToTree(myLibrary.getAllUsers(this)));
-                break;
-            case "getOnlineUsers":
-                outputs.add(objectMapper.valueToTree(myLibrary.getOnlineUsers(this)));
-                break;
-            case "addUser":
-                outputs.add(objectMapper.valueToTree(myLibrary.addUser(this)));
-                break;
-            case "addAlbum":
-                outputs.add(objectMapper.valueToTree(currentPlayer.addAlbum(this)));
-                break;
-            case "showAlbums":
+            }
+            case "getTop5Songs" ->
+                    outputs.add(objectMapper.valueToTree(myLibrary.getTop5Songs(this)));
+            case "getTop5Playlists" ->
+                    outputs.add(objectMapper.valueToTree(myLibrary.getTop5Playlists(this)));
+            case "getTop5Artists" ->
+                    outputs.add(objectMapper.valueToTree(myLibrary.getTop5Artists(this)));
+            case "switchConnectionStatus" ->
+                    outputs.add(objectMapper
+                            .valueToTree(currentPlayer.switchConnectionStatus(this)));
+            case "getAllUsers" ->
+                    outputs.add(objectMapper.valueToTree(myLibrary.getAllUsers(this)));
+            case "getOnlineUsers" ->
+                    outputs.add(objectMapper.valueToTree(myLibrary.getOnlineUsers(this)));
+            case "addUser" -> outputs.add(objectMapper.valueToTree(myLibrary.addUser(this)));
+            case "addAlbum" -> outputs.add(objectMapper.valueToTree(currentPlayer.addAlbum(this)));
+            case "showAlbums" -> {
                 artist = myLibrary.findArtistByName(username);
                 if (artist == null) {
                     System.err.println("Artist does not exist.");
                     break;
                 }
                 outputs.add(objectMapper.valueToTree(artist.showAlbums(this)));
-                break;
-            case "removeAlbum":
-                outputs.add(objectMapper.valueToTree(currentPlayer.removeAlbum(this)));
-                break;
-            case "changePage":
-                outputs.add(objectMapper.valueToTree(currentPlayer.changePage(this)));
-                break;
-            case "printCurrentPage":
+            }
+            case "removeAlbum" ->
+                    outputs.add(objectMapper.valueToTree(currentPlayer.removeAlbum(this)));
+            case "changePage" ->
+                    outputs.add(objectMapper.valueToTree(currentPlayer.changePage(this)));
+            case "printCurrentPage" -> {
                 listener = myLibrary.findListenerByUsername(username);
                 if (listener == null) {
                     System.out.println("Invalid user");
                     break;
                 }
                 outputs.add(objectMapper.valueToTree(listener.printCurrentPage(this)));
-                break;
-            case "addEvent":
-                outputs.add(objectMapper.valueToTree(currentPlayer.addEvent(this)));
-                break;
-            case "addMerch":
-                outputs.add(objectMapper.valueToTree(currentPlayer.addMerch(this)));
-                break;
-            case "addPodcast":
-                outputs.add(objectMapper.valueToTree(currentPlayer.addPodcast(this)));
-                break;
-            case "removePodcast":
-                outputs.add(objectMapper.valueToTree(currentPlayer.removePodcast(this)));
-                break;
-            case "deleteUser":
-                outputs.add(objectMapper.valueToTree(currentPlayer.deleteUser(this)));
-                break;
-            case "addAnnouncement":
-                outputs.add(objectMapper.valueToTree(currentPlayer.addAnnouncement(this)));
-                break;
-            case "removeAnnouncement":
-                outputs.add(objectMapper.valueToTree(currentPlayer.removeAnnouncement(this)));
-                break;
-            case "removeEvent":
-                outputs.add(objectMapper.valueToTree(currentPlayer.removeEvent(this)));
-                break;
-            case "showPodcasts":
-                outputs.add(objectMapper.valueToTree(currentPlayer.showPodcasts(this)));
-                break;
-            case "getTop5Albums":
-                outputs.add(objectMapper.valueToTree(myLibrary.getTop5Albums(this)));
-                break;
-            default:
-                System.err.println("Invalid command");
-                break;
+            }
+            case "addEvent" -> outputs.add(objectMapper.valueToTree(currentPlayer.addEvent(this)));
+            case "addMerch" -> outputs.add(objectMapper.valueToTree(currentPlayer.addMerch(this)));
+            case "addPodcast" ->
+                    outputs.add(objectMapper.valueToTree(currentPlayer.addPodcast(this)));
+            case "removePodcast" ->
+                    outputs.add(objectMapper.valueToTree(currentPlayer.removePodcast(this)));
+            case "deleteUser" ->
+                    outputs.add(objectMapper.valueToTree(currentPlayer.deleteUser(this)));
+            case "addAnnouncement" ->
+                    outputs.add(objectMapper.valueToTree(currentPlayer.addAnnouncement(this)));
+            case "removeAnnouncement" ->
+                    outputs.add(objectMapper.valueToTree(currentPlayer.removeAnnouncement(this)));
+            case "removeEvent" ->
+                    outputs.add(objectMapper.valueToTree(currentPlayer.removeEvent(this)));
+            case "showPodcasts" ->
+                    outputs.add(objectMapper.valueToTree(currentPlayer.showPodcasts(this)));
+            case "getTop5Albums" ->
+                    outputs.add(objectMapper.valueToTree(myLibrary.getTop5Albums(this)));
+            case "wrapped" ->
+                    outputs.add(objectMapper.valueToTree(currentPlayer.getUser().wrapped(this)));
+            default -> System.err.println("Invalid command");
         }
     }
 }

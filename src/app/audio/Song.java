@@ -1,5 +1,6 @@
 package app.audio;
 
+import app.persons.Listener;
 import app.persons.User;
 import fileio.input.SongInput;
 import lombok.Getter;
@@ -91,10 +92,13 @@ public final class Song extends AudioFile implements AudioItem {
      */
     public Song play(final AudioPlayer player, final Command command) {
         int time = player.getElapsedTime();
+
         Status status = player.getStatus();
+        Listener listener = (Listener) player.getUser();
 
         if (player.getStatus().getRepeat().equals("Repeat Once")) {
             time -= getDuration();
+            listener.addToSongListens(this, 1);
             if (time < 0) {
                 status.setRemainedTime(-time);
                 status.setName(getName());
@@ -107,10 +111,12 @@ public final class Song extends AudioFile implements AudioItem {
 
         if (player.getStatus().getRepeat().equals("No Repeat")) {
             time -= getDuration();
+            listener.addToSongListens(this, 1);
             status.setRemainedTime(-time);
         }
 
         if (player.getStatus().getRepeat().equals("Repeat Infinite")) {
+            listener.addToSongListens(this, time / getDuration());
             time %= getDuration();
             status.setRemainedTime(getDuration() - time);
             time = -1;

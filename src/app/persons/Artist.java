@@ -11,6 +11,7 @@ import app.player.Searchable;
 import app.player.Filter;
 import app.results.AlbumOutput;
 import app.results.ShowAlbumsResult;
+import app.results.WrappedResult;
 import fileio.input.UserInput;
 import lombok.Getter;
 import lombok.Setter;
@@ -130,5 +131,12 @@ public final class Artist extends User implements Searchable {
         }
         library.getArtists().remove(this);
         return getUsername() + " was successfully deleted.";
+    }
+
+    @Override
+    public WrappedResult wrapped(Command command) {
+        return new WrappedResult.Builder(this)
+                .timestamp(command.getTimestamp())
+                .build();
     }
 }

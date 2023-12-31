@@ -1,23 +1,18 @@
 package app.persons;
 
-import app.audio.LibrarySingleton;
-import app.audio.Playlist;
-import app.audio.Podcast;
-import app.audio.Song;
+import app.audio.*;
 import app.player.AudioPlayer;
 import app.player.Page;
-import app.results.PlaylistOutput;
-import app.results.PrintCurrentPageResult;
-import app.results.ShowPlaylistsResult;
-import app.results.ShowPreferredSongsResult;
-import app.results.SwitchVisibilityResult;
+import app.results.*;
 import fileio.input.UserInput;
 import lombok.Getter;
 import lombok.Setter;
 import main.Command;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.Map.*;
 
 @Getter @Setter
 public final class Listener extends User {
@@ -25,14 +20,18 @@ public final class Listener extends User {
     private final ArrayList<Playlist> playlists;
     private final ArrayList<Song> likedSongs;
     private final HashMap<Podcast, Integer> podcastListenTime;
+    private final HashMap<Song, Integer> songListens;
+    private final HashMap<Episode, Integer> episodeListens;
     private boolean online;
     private Page currentPage;
 
     public Listener(final Command command) {
         super(command);
-        this.playlists = new ArrayList<>();
-        this.likedSongs = new ArrayList<>();
+        playlists = new ArrayList<>();
+        likedSongs = new ArrayList<>();
         podcastListenTime = new HashMap<>();
+        songListens = new HashMap<>();
+        episodeListens = new HashMap<>();
         online = true;
         currentPage = new Page(this);
     }
@@ -41,6 +40,8 @@ public final class Listener extends User {
         this.playlists = new ArrayList<>();
         this.likedSongs = new ArrayList<>();
         podcastListenTime = new HashMap<>();
+        songListens = new HashMap<>();
+        episodeListens = new HashMap<>();
         online = true;
         currentPage = new Page(this);
     }
@@ -155,5 +156,98 @@ public final class Listener extends User {
             playlist.getFollowers().remove(this);
         }
         return getUsername() + " was successfully deleted.";
+    }
+
+    public void addToSongListens(Song song, int listens) {
+        songListens.put(song, songListens.getOrDefault(song, 0) + listens);
+    }
+
+    public void addToEpisodeListens(Episode episode, int listens) {
+        episodeListens.put(episode, episodeListens.getOrDefault(episode, 0) + listens);
+    }
+
+    @Override
+    public WrappedResult wrapped(Command command) {
+        WrappedResult result = new WrappedResult.Builder(this)
+                                    .timestamp(command.getTimestamp())
+                                    .build();
+        if (result.getMessage() != null) {
+            return result;
+        }
+
+        Map<String, Integer> artistListenCounts = new HashMap<>();
+        Map<String, Integer> genreListenCounts = new HashMap<>();
+        Map<String, Integer> albumListenCounts = new HashMap<>();
+
+        for (Map.Entry<Song, Integer> entry : songListens.entrySet()) {
+            String artist = entry.getKey().getArtist();
+            String genre = entry.getKey().getGenre();
+            String album = entry.getKey().getAlbum();
+            int listens = entry.getValue();
+            artistListenCounts.put(artist, artistListenCounts.getOrDefault(artist, 0) + listens);
+            genreListenCounts.put(genre, genreListenCounts.getOrDefault(genre, 0) + listens);
+            albumListenCounts.put(album, albumListenCounts.getOrDefault(album, 0) + listens);
+        }
+
+        LinkedHashMap<String, Integer> top5Artists = artistListenCounts.entrySet().stream()
+                .sorted(Comparator.comparing(Entry::getValue, Comparator.reverseOrder()))
+                .limit(5)
+                .collect(Collectors.toMap(
+                        Entry::getKey,
+                        Entry::getValue,
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new
+                ));
+
+        result.getResult().put("top5Artists", top5Artists);
+
+        LinkedHashMap<String, Integer> top5Genres = genreListenCounts.entrySet().stream()
+                .sorted(Comparator.comparing(Entry::getValue, Comparator.reverseOrder()))
+                .limit(5)
+                .collect(Collectors.toMap(
+                        Entry::getKey,
+                        Entry::getValue,
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new
+                ));
+
+        result.getResult().put("top5Genres", top5Genres);
+
+        LinkedHashMap<String, Integer> top5Songs = songListens.entrySet().stream()
+                .sorted(Comparator.comparing(Entry::getValue, Comparator.reverseOrder()))
+                .limit(5)
+                .collect(Collectors.toMap(
+                        entry -> entry.getKey().getName(),
+                        Entry::getValue,
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new
+                ));
+
+        result.getResult().put("top5Songs", top5Songs);
+
+        LinkedHashMap<String, Integer> top5Albums = albumListenCounts.entrySet().stream()
+                .sorted(Comparator.comparing(Entry::getValue, Comparator.reverseOrder()))
+                .limit(5)
+                .collect(Collectors.toMap(
+                        Entry::getKey,
+                        Entry::getValue,
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new
+                ));
+
+        result.getResult().put("top5Albums", top5Albums);
+
+        Map<String, Integer> top5Episodes = episodeListens.entrySet().stream()
+                .sorted(Comparator.comparing(Entry::getValue, Comparator.reverseOrder()))
+                .limit(5)
+                .collect(Collectors.toMap(
+                        entry -> entry.getKey().getName(),
+                        Entry::getValue,
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new
+                ));
+
+        result.getResult().put("top5Episodes", top5Episodes);
+        return result;
     }
 }

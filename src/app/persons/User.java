@@ -1,5 +1,6 @@
 package app.persons;
 
+import app.results.WrappedResult;
 import fileio.input.UserInput;
 import lombok.Getter;
 import lombok.Setter;
@@ -43,4 +44,6 @@ public abstract class User {
      * @return a string informing whether the delete was successful
      */
     public abstract String delete(Command command);
+
+    public abstract WrappedResult wrapped(Command command);
 }

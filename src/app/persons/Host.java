@@ -6,6 +6,7 @@ import app.player.Announcement;
 import app.player.AudioPlayer;
 import app.player.Filter;
 import app.player.Searchable;
+import app.results.WrappedResult;
 import fileio.input.UserInput;
 import lombok.Getter;
 import main.Command;
@@ -78,5 +79,12 @@ public final class Host extends User implements Searchable {
         library.getPodcasts().removeIf(podcast -> podcast.getOwner().equals(getName()));
         library.getHosts().remove(this);
         return getUsername() + " was successfully deleted.";
+    }
+
+    @Override
+    public WrappedResult wrapped(Command command) {
+        return new WrappedResult.Builder(this)
+                .timestamp(command.getTimestamp())
+                .build();
     }
 }

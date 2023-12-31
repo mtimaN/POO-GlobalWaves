@@ -1,5 +1,6 @@
 package app.audio;
 
+import app.persons.Listener;
 import app.player.AudioPlayer;
 import app.player.Status;
 import lombok.Getter;
@@ -27,6 +28,8 @@ public abstract class SongCollection implements AudioItem {
         Status status = player.getStatus();
         ArrayList<Integer> positions = new ArrayList<>();
         int id = player.getTrackId();
+        Listener listener = (Listener) player.getUser();
+
         for (int i = 0; i < songs.size(); ++i) {
             positions.add(i, i);
         }
@@ -44,6 +47,8 @@ public abstract class SongCollection implements AudioItem {
                 while (time >= 0) {
                     for (int i = 0; i < songs.size(); ++i) {
                         int position = positions.get((i + id) % songs.size());
+                        listener.addToSongListens(songs.get(position), 1);
+
                         if (time >= songs.get(position).getDuration()) {
                             time -= songs.get(position).getDuration();
                         } else {
@@ -63,6 +68,8 @@ public abstract class SongCollection implements AudioItem {
                         break;
                     }
                     int position = positions.get(i + id);
+                    listener.addToSongListens(songs.get(position), 1);
+
                     if (time >= songs.get(position).getDuration()) {
                         time -= songs.get(position).getDuration();
                     } else {
@@ -76,6 +83,8 @@ public abstract class SongCollection implements AudioItem {
             }
             case "Repeat Current Song" -> {
                 Song currentSong = (Song) player.getCurrentFile();
+
+                listener.addToSongListens(currentSong, time / currentSong.getDuration());
                 time %= currentSong.getDuration();
                 player.setElapsedTime(time);
                 status.setRemainedTime(currentSong.getDuration() - time);
