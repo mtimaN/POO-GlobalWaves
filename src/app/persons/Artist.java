@@ -17,7 +17,8 @@ import lombok.Getter;
 import lombok.Setter;
 import main.Command;
 
-import java.util.ArrayList;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Getter @Setter
 public final class Artist extends User implements Searchable {
@@ -135,8 +136,77 @@ public final class Artist extends User implements Searchable {
 
     @Override
     public WrappedResult wrapped(Command command) {
-        return new WrappedResult.Builder(this)
+        WrappedResult result = new WrappedResult.Builder(this)
                 .timestamp(command.getTimestamp())
                 .build();
+
+        if (result.getMessage() != null) {
+            return result;
+        }
+
+        HashMap<String, AudioPlayer> audioPlayers = LibrarySingleton.getInstance().getAudioPlayers();
+        Map<String, Integer> albumListenCounts = new HashMap<>();
+        Map<String, Integer> songListenCounts = new HashMap<>();
+        Map<String, Integer> fansListenCounts = new HashMap<>();
+        for (Listener listener: LibrarySingleton.getInstance().getListeners()) {
+            int listenCounter = 0;
+            if (audioPlayers.containsKey(listener.getUsername())) {
+                audioPlayers.get(listener.getUsername()).updateStatus(command);
+            }
+
+            for (Map.Entry<Song, Integer> entry: listener.getSongListens().entrySet()) {
+                if (entry.getKey().getArtist().equals(getUsername())) {
+                    String songName = entry.getKey().getName();
+                    String albumName = entry.getKey().getAlbum();
+                    int listens = entry.getValue();
+                    listenCounter += listens;
+                    albumListenCounts.put(albumName,
+                            albumListenCounts.getOrDefault(albumName, 0) + listens);
+                    songListenCounts.put(songName,
+                            songListenCounts.getOrDefault(songName, 0) + listens);
+                }
+            }
+            if (listenCounter > 0) {
+                fansListenCounts.put(listener.getUsername(), listenCounter);
+            }
+        }
+
+        LinkedHashMap<String, Integer> top5Albums = albumListenCounts.entrySet().stream()
+                .sorted(Comparator.comparing(Map.Entry::getValue, Comparator.reverseOrder()))
+                .limit(5)
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new
+                ));
+
+        result.getResult().put("topAlbums", top5Albums);
+
+        LinkedHashMap<String, Integer> top5Songs = songListenCounts.entrySet().stream()
+                .sorted(Comparator.comparing(Map.Entry::getValue, Comparator.reverseOrder()))
+                .limit(5)
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new
+                ));
+
+        result.getResult().put("topSongs", top5Songs);
+
+
+        LinkedHashMap<String, Integer> top5Fans = fansListenCounts.entrySet().stream()
+                .sorted(Comparator.comparing(Map.Entry::getValue, Comparator.reverseOrder()))
+                .limit(5)
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new
+                ));
+
+        result.getResult().put("topFans", top5Fans);
+        return result;
     }
 }

@@ -76,7 +76,7 @@ public final class Podcast implements AudioItem {
         if (listener == null) {
             return null;
         }
-        listener.getPodcastListenTime().put(this, time + 1);
+        listener.getPodcastListenTime().put(this, time);
         for (Episode episode: getEpisodes()) {
             listener.addToEpisodeListens(episode, 1);
             if (time >= episode.getDuration()) {

@@ -74,7 +74,6 @@ public final class AudioPlayer {
      * @param command given command
      */
     public void emptyPlayer(final Command command) {
-        elapsedTime--;
         currentFile = updateStatus(command);
         setCurrentItem(null);
         setCurrentFile(null);
@@ -172,6 +171,7 @@ public final class AudioPlayer {
             elapsedTime += command.getTimestamp() - playTimestamp;
             playTimestamp = command.getTimestamp();
         }
+
         return currentItem.play(this, command);
     }
 

@@ -47,15 +47,18 @@ public abstract class SongCollection implements AudioItem {
                 while (time >= 0) {
                     for (int i = 0; i < songs.size(); ++i) {
                         int position = positions.get((i + id) % songs.size());
-                        listener.addToSongListens(songs.get(position), 1);
 
                         if (time >= songs.get(position).getDuration()) {
                             time -= songs.get(position).getDuration();
+                            listener.addToSongListens(songs.get(position), 1);
                         } else {
                             player.setElapsedTime(time);
                             status.setName(songs.get(position).getName());
                             status.setRemainedTime(songs.get(position).getDuration() - time);
-                            player.setTrackId(position);
+                            if (player.getTrackId() != position) {
+                                player.setTrackId(position);
+                                listener.addToSongListens(songs.get(position), 1);
+                            }
                             return songs.get(position);
                         }
                     }
@@ -68,15 +71,18 @@ public abstract class SongCollection implements AudioItem {
                         break;
                     }
                     int position = positions.get(i + id);
-                    listener.addToSongListens(songs.get(position), 1);
 
                     if (time >= songs.get(position).getDuration()) {
                         time -= songs.get(position).getDuration();
+                        listener.addToSongListens(songs.get(position), 1);
                     } else {
                         player.setElapsedTime(time);
                         status.setName(songs.get(position).getName());
                         status.setRemainedTime(songs.get(position).getDuration() - time);
-                        player.setTrackId(position);
+                        if (player.getTrackId() != position) {
+                            player.setTrackId(position);
+                            listener.addToSongListens(songs.get(position), 1);
+                        }
                         return songs.get(position);
                     }
                 }
@@ -84,7 +90,7 @@ public abstract class SongCollection implements AudioItem {
             case "Repeat Current Song" -> {
                 Song currentSong = (Song) player.getCurrentFile();
 
-                listener.addToSongListens(currentSong, time / currentSong.getDuration());
+                listener.addToSongListens(currentSong, time / currentSong.getDuration() + 1);
                 time %= currentSong.getDuration();
                 player.setElapsedTime(time);
                 status.setRemainedTime(currentSong.getDuration() - time);

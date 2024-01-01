@@ -96,6 +96,10 @@ public final class Song extends AudioFile implements AudioItem {
         Status status = player.getStatus();
         Listener listener = (Listener) player.getUser();
 
+        if (status.getName().equals(name)) {
+            listener.addToSongListens(this, -1);
+        }
+
         if (player.getStatus().getRepeat().equals("Repeat Once")) {
             time -= getDuration();
             listener.addToSongListens(this, 1);
@@ -116,7 +120,7 @@ public final class Song extends AudioFile implements AudioItem {
         }
 
         if (player.getStatus().getRepeat().equals("Repeat Infinite")) {
-            listener.addToSongListens(this, time / getDuration());
+            listener.addToSongListens(this, time / getDuration() + 1);
             time %= getDuration();
             status.setRemainedTime(getDuration() - time);
             time = -1;

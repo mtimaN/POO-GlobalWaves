@@ -153,8 +153,10 @@ public final class Command {
                     outputs.add(objectMapper.valueToTree(currentPlayer.showPodcasts(this)));
             case "getTop5Albums" ->
                     outputs.add(objectMapper.valueToTree(myLibrary.getTop5Albums(this)));
-            case "wrapped" ->
-                    outputs.add(objectMapper.valueToTree(currentPlayer.getUser().wrapped(this)));
+            case "wrapped" -> {
+                currentPlayer.updateStatus(this);
+                outputs.add(objectMapper.valueToTree(currentPlayer.getUser().wrapped(this)));
+            }
             default -> System.err.println("Invalid command");
         }
     }
