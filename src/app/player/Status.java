@@ -10,6 +10,13 @@ public final class Status {
     private boolean shuffle;
     private boolean paused;
 
+    public void empty() {
+        name = "";
+        paused = true;
+        remainedTime = 0;
+        repeat = "No Repeat";
+        shuffle = false;
+    }
     public void setName(final String name) {
         this.name = name;
     }

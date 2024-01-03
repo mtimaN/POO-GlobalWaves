@@ -94,6 +94,8 @@ public final class Main {
             }
             command.execute(outputs, currentPlayer, objectMapper);
         }
+        outputs.add(objectMapper
+                .valueToTree(myLibrary.endProgram()));
         ObjectWriter objectWriter = objectMapper.writerWithDefaultPrettyPrinter();
         objectWriter.writeValue(new File(filePath2), outputs);
         myLibrary.deleteLibrary();

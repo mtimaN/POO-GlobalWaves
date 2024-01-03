@@ -3,12 +3,7 @@ package app.audio;
 import app.persons.Artist;
 import app.persons.Host;
 import app.player.AudioPlayer;
-import app.results.AddUserResult;
-import app.results.GetAllUsersResult;
-import app.results.GetOnlineUsersResult;
-import app.results.GetTop5PlaylistsResult;
-import app.results.GetTop5SongsResult;
-import app.results.StatisticsResult;
+import app.results.*;
 import fileio.input.LibraryInput;
 import fileio.input.PodcastInput;
 import fileio.input.SongInput;
@@ -21,6 +16,7 @@ import app.persons.User;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.stream.Collectors;
 
 @Getter
@@ -366,6 +362,24 @@ public final class LibrarySingleton {
         }
         result.setMessage("The username " + command.getUsername()
                 + " has been added successfully.");
+        return result;
+    }
+
+    public EndResult endProgram() {
+        EndResult result = new EndResult.Builder().build();
+        ArrayList<Artist> filteredArtists = artists.stream()
+                .filter(artist -> artist.getPlays() > 0)
+                .sorted(Comparator.comparing(Artist::getName))
+                .collect(Collectors.toCollection(ArrayList::new));
+        int rank = 1;
+        for (Artist artist: filteredArtists) {
+            LinkedHashMap<String, Object> stats = new LinkedHashMap<>();
+            stats.put("songRevenue", 0f);
+            stats.put("merchRevenue", artist.getMerchRevenue());
+            stats.put("ranking", rank++);
+            stats.put("mostProfitableSong", "N/A");
+            result.getResult().put(artist.getName(), stats);
+        }
         return result;
     }
 }

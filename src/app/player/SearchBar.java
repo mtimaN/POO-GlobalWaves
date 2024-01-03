@@ -1,7 +1,9 @@
 package app.player;
 
+import app.audio.Album;
 import app.audio.LibrarySingleton;
 import app.audio.Playlist;
+import app.persons.Artist;
 import app.persons.Listener;
 import lombok.Getter;
 import lombok.Setter;
@@ -49,7 +51,13 @@ public final class SearchBar {
             case "playlist" -> new ArrayList<>(searchListener.getPlaylists());
             case "artist" -> new ArrayList<>(library.getArtists());
             case "host" -> new ArrayList<>(library.getHosts());
-            case "album" -> new ArrayList<>(library.getAlbums());
+            case "album" -> {
+                ArrayList<Searchable> albumArrayList = new ArrayList<>();
+                for (Artist artist: library.getArtists()) {
+                    albumArrayList.addAll(artist.getAlbums());
+                }
+                yield albumArrayList;
+            }
             default -> new ArrayList<>(library.getPodcasts());
         };
         results = new ArrayList<>();

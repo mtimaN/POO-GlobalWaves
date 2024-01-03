@@ -6,21 +6,19 @@ import app.persons.Listener;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 @Getter @Setter
 public class WrappedResult extends Result {
     private String message;
-    private Map<String, Map<String, Integer>> result;
+    private Map<String, Object> result;
 
     public static class Builder {
         private int timestamp;
         private final String username;
         private String message = null;
-        private Map<String, Map<String, Integer>> result = null;
+        private Map<String, Object> result = null;
         public Builder(Listener listener) {
             username = listener.getUsername();
             if (listener.getSongListens().isEmpty()) {

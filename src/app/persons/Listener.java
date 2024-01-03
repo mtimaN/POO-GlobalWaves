@@ -12,7 +12,7 @@ import main.Command;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.Map.*;
+import static java.util.Map.Entry;
 
 @Getter @Setter
 public final class Listener extends User {
@@ -159,6 +159,10 @@ public final class Listener extends User {
     }
 
     public void addToSongListens(Song song, int listens) {
+        Artist artist = LibrarySingleton.getInstance().findArtistByName(song.getArtist());
+        if (artist != null) {
+            artist.setPlays(artist.getPlays() + listens);
+        }
         songListens.put(song, songListens.getOrDefault(song, 0) + listens);
     }
 
@@ -175,9 +179,9 @@ public final class Listener extends User {
             return result;
         }
 
-        Map<String, Integer> artistListenCounts = new HashMap<>();
-        Map<String, Integer> genreListenCounts = new HashMap<>();
-        Map<String, Integer> albumListenCounts = new HashMap<>();
+        HashMap<String, Integer> artistListenCounts = new HashMap<>();
+        HashMap<String, Integer> genreListenCounts = new HashMap<>();
+        HashMap<String, Integer> albumListenCounts = new HashMap<>();
 
         for (Map.Entry<Song, Integer> entry : songListens.entrySet()) {
             String artist = entry.getKey().getArtist();
@@ -190,7 +194,8 @@ public final class Listener extends User {
         }
 
         LinkedHashMap<String, Integer> top5Artists = artistListenCounts.entrySet().stream()
-                .sorted(Comparator.comparing(Entry::getValue, Comparator.reverseOrder()))
+                .sorted(Entry.<String, Integer>comparingByValue(Comparator.reverseOrder())
+                        .thenComparing(Entry.comparingByKey()))
                 .limit(5)
                 .collect(Collectors.toMap(
                         Entry::getKey,
@@ -199,10 +204,11 @@ public final class Listener extends User {
                         LinkedHashMap::new
                 ));
 
-        result.getResult().put("top5Artists", top5Artists);
+        result.getResult().put("topArtists", top5Artists);
 
         LinkedHashMap<String, Integer> top5Genres = genreListenCounts.entrySet().stream()
-                .sorted(Comparator.comparing(Entry::getValue, Comparator.reverseOrder()))
+                .sorted(Entry.<String, Integer>comparingByValue(Comparator.reverseOrder())
+                        .thenComparing(Entry.comparingByKey()))
                 .limit(5)
                 .collect(Collectors.toMap(
                         Entry::getKey,
@@ -211,22 +217,31 @@ public final class Listener extends User {
                         LinkedHashMap::new
                 ));
 
-        result.getResult().put("top5Genres", top5Genres);
+        result.getResult().put("topGenres", top5Genres);
 
-        LinkedHashMap<String, Integer> top5Songs = songListens.entrySet().stream()
-                .sorted(Comparator.comparing(Entry::getValue, Comparator.reverseOrder()))
-                .limit(5)
+        Map<String, Integer> top5Songs = songListens.entrySet().stream()
                 .collect(Collectors.toMap(
                         entry -> entry.getKey().getName(),
                         Entry::getValue,
-                        (e1, e2) -> e1,
+                        Integer::sum,
+                        LinkedHashMap::new
+                ))
+                .entrySet().stream()
+                .sorted(Entry.<String, Integer>comparingByValue(Comparator.reverseOrder())
+                        .thenComparing(Entry.comparingByKey()))
+                .limit(5)
+                .collect(Collectors.toMap(
+                        Entry::getKey,
+                        Entry::getValue,
+                        Integer::sum,
                         LinkedHashMap::new
                 ));
 
-        result.getResult().put("top5Songs", top5Songs);
+        result.getResult().put("topSongs", top5Songs);
 
         LinkedHashMap<String, Integer> top5Albums = albumListenCounts.entrySet().stream()
-                .sorted(Comparator.comparing(Entry::getValue, Comparator.reverseOrder()))
+                .sorted(Entry.<String, Integer>comparingByValue(Comparator.reverseOrder())
+                        .thenComparing(Entry.comparingByKey()))
                 .limit(5)
                 .collect(Collectors.toMap(
                         Entry::getKey,
@@ -235,10 +250,11 @@ public final class Listener extends User {
                         LinkedHashMap::new
                 ));
 
-        result.getResult().put("top5Albums", top5Albums);
+        result.getResult().put("topAlbums", top5Albums);
 
         Map<String, Integer> top5Episodes = episodeListens.entrySet().stream()
-                .sorted(Comparator.comparing(Entry::getValue, Comparator.reverseOrder()))
+                .sorted(Entry.<Episode, Integer>comparingByValue(Comparator.reverseOrder())
+                        .thenComparing(Entry.comparingByKey(Comparator.comparing(Episode::getName))))
                 .limit(5)
                 .collect(Collectors.toMap(
                         entry -> entry.getKey().getName(),
@@ -247,7 +263,7 @@ public final class Listener extends User {
                         LinkedHashMap::new
                 ));
 
-        result.getResult().put("top5Episodes", top5Episodes);
+        result.getResult().put("topEpisodes", top5Episodes);
         return result;
     }
 }

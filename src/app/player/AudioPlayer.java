@@ -77,6 +77,7 @@ public final class AudioPlayer {
         currentFile = updateStatus(command);
         setCurrentItem(null);
         setCurrentFile(null);
+        status.empty();
     }
 
     /**
@@ -159,11 +160,7 @@ public final class AudioPlayer {
 
         Listener listener = (Listener) user;
         if (currentItem == null) {
-            status.setName("");
-            status.setPaused(true);
-            status.setRemainedTime(0);
-            status.setRepeat("No Repeat");
-            status.setShuffle(false);
+            status.empty();
             return null;
         }
 

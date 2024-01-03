@@ -25,15 +25,21 @@ public final class Artist extends User implements Searchable {
     private ArrayList<Album> albums;
     private ArrayList<Event> events;
     private ArrayList<Merch> merchItems;
+    private float merchRevenue;
+    private float plays;
 
     public Artist(final Command command) {
         super(command);
+        merchRevenue = 0;
+        plays = 0;
         albums = new ArrayList<>();
         events = new ArrayList<>();
         merchItems = new ArrayList<>();
     }
     public Artist(final UserInput user) {
         super(user);
+        merchRevenue = 0;
+        plays = 0;
         albums = new ArrayList<>();
         events = new ArrayList<>();
         merchItems = new ArrayList<>();
@@ -172,7 +178,8 @@ public final class Artist extends User implements Searchable {
         }
 
         LinkedHashMap<String, Integer> top5Albums = albumListenCounts.entrySet().stream()
-                .sorted(Comparator.comparing(Map.Entry::getValue, Comparator.reverseOrder()))
+                .sorted(Map.Entry.<String, Integer>comparingByValue(Comparator.reverseOrder())
+                        .thenComparing(Map.Entry.comparingByKey()))
                 .limit(5)
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
@@ -184,7 +191,8 @@ public final class Artist extends User implements Searchable {
         result.getResult().put("topAlbums", top5Albums);
 
         LinkedHashMap<String, Integer> top5Songs = songListenCounts.entrySet().stream()
-                .sorted(Comparator.comparing(Map.Entry::getValue, Comparator.reverseOrder()))
+                .sorted(Map.Entry.<String, Integer>comparingByValue(Comparator.reverseOrder())
+                        .thenComparing(Map.Entry.comparingByKey()))
                 .limit(5)
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
@@ -196,17 +204,16 @@ public final class Artist extends User implements Searchable {
         result.getResult().put("topSongs", top5Songs);
 
 
-        LinkedHashMap<String, Integer> top5Fans = fansListenCounts.entrySet().stream()
-                .sorted(Comparator.comparing(Map.Entry::getValue, Comparator.reverseOrder()))
+        ArrayList<String> top5Fans = fansListenCounts.entrySet().stream()
+                .sorted(Map.Entry.<String, Integer>comparingByValue(Comparator.reverseOrder())
+                        .thenComparing(Map.Entry.comparingByKey()))
                 .limit(5)
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (e1, e2) -> e1,
-                        LinkedHashMap::new
-                ));
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toCollection(ArrayList::new));
 
         result.getResult().put("topFans", top5Fans);
+
+        result.getResult().put("listeners", fansListenCounts.size());
         return result;
     }
 }

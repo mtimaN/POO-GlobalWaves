@@ -39,7 +39,8 @@ public final class Song extends AudioFile implements AudioItem {
      * @return true if all filters are met, false otherwise
      */
     public boolean matchesFilter(final Filter filters) {
-        if (filters.getName() != null && !this.getName().startsWith(filters.getName())) {
+        if (filters.getName() != null
+                && !this.getName().toLowerCase().startsWith(filters.getName().toLowerCase())) {
             return false;
         }
         if (filters.getAlbum() != null && !this.getAlbum().equals(filters.getAlbum())) {
