@@ -157,7 +157,8 @@ public final class Artist extends User implements Searchable {
         for (Listener listener: LibrarySingleton.getInstance().getListeners()) {
             int listenCounter = 0;
             if (audioPlayers.containsKey(listener.getUsername())) {
-                audioPlayers.get(listener.getUsername()).updateStatus(command);
+                AudioPlayer player = audioPlayers.get(listener.getUsername());
+                player.setCurrentFile(player.updateStatus(command));
             }
 
             for (Map.Entry<Song, Integer> entry: listener.getSongListens().entrySet()) {

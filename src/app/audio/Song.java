@@ -109,7 +109,7 @@ public final class Song extends AudioFile implements AudioItem {
                 status.setName(getName());
                 return this;
             } else {
-                player.setElapsedTime(player.getElapsedTime() % getDuration());
+                player.setElapsedTime(player.getElapsedTime() - getDuration());
                 status.setRepeat("No Repeat");
             }
         }

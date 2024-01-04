@@ -42,23 +42,23 @@ public abstract class SongCollection implements AudioItem {
                 }
             }
         }
+        if (songs.get(positions.get(id)).getName().equals(status.getName())) {
+            listener.addToSongListens(songs.get(positions.get(id)), -1);
+        }
         switch (status.getRepeat()) {
             case "Repeat All" -> {
                 while (time >= 0) {
                     for (int i = 0; i < songs.size(); ++i) {
                         int position = positions.get((i + id) % songs.size());
+                        listener.addToSongListens(songs.get(position), 1);
 
                         if (time >= songs.get(position).getDuration()) {
                             time -= songs.get(position).getDuration();
-                            listener.addToSongListens(songs.get(position), 1);
                         } else {
                             player.setElapsedTime(time);
                             status.setName(songs.get(position).getName());
                             status.setRemainedTime(songs.get(position).getDuration() - time);
-                            if (player.getTrackId() != position) {
-                                player.setTrackId(position);
-                                listener.addToSongListens(songs.get(position), 1);
-                            }
+                            player.setTrackId(position);
                             return songs.get(position);
                         }
                     }
@@ -71,18 +71,15 @@ public abstract class SongCollection implements AudioItem {
                         break;
                     }
                     int position = positions.get(i + id);
+                    listener.addToSongListens(songs.get(position), 1);
 
                     if (time >= songs.get(position).getDuration()) {
                         time -= songs.get(position).getDuration();
-                        listener.addToSongListens(songs.get(position), 1);
                     } else {
                         player.setElapsedTime(time);
                         status.setName(songs.get(position).getName());
                         status.setRemainedTime(songs.get(position).getDuration() - time);
-                        if (player.getTrackId() != position) {
-                            player.setTrackId(position);
-                            listener.addToSongListens(songs.get(position), 1);
-                        }
+                        player.setTrackId(position);
                         return songs.get(position);
                     }
                 }
