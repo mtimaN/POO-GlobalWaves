@@ -11,32 +11,7 @@ import app.persons.Artist;
 import app.persons.Host;
 import app.persons.Listener;
 import app.persons.User;
-import app.results.AddAlbumResult;
-import app.results.AddAnnouncementResult;
-import app.results.AddEventResult;
-import app.results.AddMerchResult;
-import app.results.AddPodcastResult;
-import app.results.AddRemoveInPlaylistResult;
-import app.results.BackwardResult;
-import app.results.ChangePageResult;
-import app.results.DeleteUserResult;
-import app.results.FollowResult;
-import app.results.ForwardResult;
-import app.results.LikeResult;
-import app.results.LoadResult;
-import app.results.NextResult;
-import app.results.PlayPauseResult;
-import app.results.PodcastOutput;
-import app.results.PrevResult;
-import app.results.RemoveAlbumResult;
-import app.results.RemoveAnnouncementResult;
-import app.results.RemoveEventResult;
-import app.results.RemovePodcastResult;
-import app.results.RepeatResult;
-import app.results.ShowPodcastsResult;
-import app.results.ShuffleResult;
-import app.results.StatusResult;
-import app.results.SwitchConnectionStatusResult;
+import app.results.*;
 import fileio.input.EpisodeInput;
 import fileio.input.SongInput;
 import lombok.Getter;
@@ -59,6 +34,7 @@ public final class AudioPlayer {
     private Status status;
     private int trackId;
     private int seed;
+    private int addTime;
 
     public AudioPlayer(final Command command) {
         user = LibrarySingleton.getInstance().findUserByUsername(command.getUsername());
@@ -1004,6 +980,36 @@ public final class AudioPlayer {
         }
 
         result.setMessage(command.getUsername() + " doesn't have an event with the given name");
+        return result;
+    }
+
+    public MessageResult buyMerch(final Command command) {
+        MessageResult result = new MessageResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
+        if (user == null) {
+            result.setMessage("The username " + command.getUsername() + " doesn't exist.");
+            return result;
+        }
+
+        Listener listener = (Listener) user;
+
+        if (listener.getCurrentPage().getPageType() != Page.Type.ARTIST) {
+            result.setMessage("Cannot buy merch from this page.");
+            return result;
+        }
+
+        Artist artist = (Artist) listener.getCurrentPage().getPageOwner();
+        for (Merch merch: artist.getMerchItems()) {
+            if (merch.getName().equals(command.getName())) {
+                artist.setMerchRevenue(artist.getMerchRevenue() + merch.getPrice());
+                result.setMessage(listener.getUsername() + " has added new merch successfully.");
+                return result;
+            }
+        }
+
+        result.setMessage("The merch " + command.getName() + " doesn't exist.");
         return result;
     }
 }

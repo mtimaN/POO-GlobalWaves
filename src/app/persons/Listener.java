@@ -24,6 +24,7 @@ public final class Listener extends User {
     private final HashMap<Episode, Integer> episodeListens;
     private boolean online;
     private Page currentPage;
+    private boolean premium;
 
     public Listener(final Command command) {
         super(command);
@@ -33,6 +34,7 @@ public final class Listener extends User {
         songListens = new HashMap<>();
         episodeListens = new HashMap<>();
         online = true;
+        premium = false;
         currentPage = new Page(this);
     }
     public Listener(final UserInput input) {
@@ -43,6 +45,7 @@ public final class Listener extends User {
         songListens = new HashMap<>();
         episodeListens = new HashMap<>();
         online = true;
+        premium = false;
         currentPage = new Page(this);
     }
 
@@ -266,4 +269,5 @@ public final class Listener extends User {
         result.getResult().put("topEpisodes", top5Episodes);
         return result;
     }
+
 }

@@ -157,6 +157,7 @@ public final class Command {
                 currentPlayer.setCurrentFile(currentPlayer.updateStatus(this));
                 outputs.add(objectMapper.valueToTree(currentPlayer.getUser().wrapped(this)));
             }
+            case "buyMerch" -> outputs.add(objectMapper.valueToTree(currentPlayer.buyMerch(this)));
             default -> System.err.println("Invalid command");
         }
     }
