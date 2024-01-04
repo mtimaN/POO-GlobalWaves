@@ -25,7 +25,9 @@ public final class Artist extends User implements Searchable {
     private ArrayList<Album> albums;
     private ArrayList<Event> events;
     private ArrayList<Merch> merchItems;
-    private float merchRevenue;
+    private double merchRevenue;
+    private double streamsRevenue;
+    private HashMap<Song, Double> songProfits;
     private float plays;
 
     public Artist(final Command command) {
@@ -35,6 +37,7 @@ public final class Artist extends User implements Searchable {
         albums = new ArrayList<>();
         events = new ArrayList<>();
         merchItems = new ArrayList<>();
+        songProfits = new HashMap<>();
     }
     public Artist(final UserInput user) {
         super(user);
@@ -43,6 +46,7 @@ public final class Artist extends User implements Searchable {
         albums = new ArrayList<>();
         events = new ArrayList<>();
         merchItems = new ArrayList<>();
+        songProfits = new HashMap<>();
     }
 
     /**

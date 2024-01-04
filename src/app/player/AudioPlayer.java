@@ -18,10 +18,7 @@ import lombok.Getter;
 import lombok.Setter;
 import main.Command;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 @Getter @Setter
 public final class AudioPlayer {
@@ -1010,6 +1007,54 @@ public final class AudioPlayer {
         }
 
         result.setMessage("The merch " + command.getName() + " doesn't exist.");
+        return result;
+    }
+
+    public MessageResult buyPremium(final Command command) {
+        MessageResult result = new MessageResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
+
+        if (user == null) {
+            result.setMessage("The username " + command.getUsername() + "doesn't exist.");
+            return result;
+        }
+        Listener listener = (Listener) user;
+        if (listener.isPremium()) {
+            result.setMessage(command.getUsername() + " is already a premium user.");
+            return result;
+        }
+
+        // TODO: nonpremium split
+        listener.setSongsRevenueShare(new HashMap<>());
+        listener.setRevenueSongs(0);
+        listener.setPremium(true);
+        listener.setRevenue(1e6);
+        result.setMessage(command.getUsername() + " bought the subscription successfully.");
+        return result;
+    }
+
+    public MessageResult cancelPremium(final Command command) {
+        MessageResult result = new MessageResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
+
+        if (user == null) {
+            result.setMessage("The username " + command.getUsername() + "doesn't exist.");
+            return result;
+        }
+
+        Listener listener = (Listener) user;
+        if (!listener.isPremium()) {
+            result.setMessage(command.getUsername() + " is not a premium user.");
+            return result;
+        }
+        listener.splitMoney();
+        listener.setSongsRevenueShare(new HashMap<>());
+        listener.setPremium(false);
+        result.setMessage(command.getUsername() + " cancelled the subscription successfully.");
         return result;
     }
 }

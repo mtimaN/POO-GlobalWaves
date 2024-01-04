@@ -158,6 +158,8 @@ public final class Command {
                 outputs.add(objectMapper.valueToTree(currentPlayer.getUser().wrapped(this)));
             }
             case "buyMerch" -> outputs.add(objectMapper.valueToTree(currentPlayer.buyMerch(this)));
+            case "buyPremium" -> outputs.add(objectMapper.valueToTree(currentPlayer.buyPremium(this)));
+            case "cancelPremium" -> outputs.add(objectMapper.valueToTree(currentPlayer.cancelPremium(this)));
             default -> System.err.println("Invalid command");
         }
     }

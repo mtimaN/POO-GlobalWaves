@@ -31,7 +31,7 @@ public class WrappedResult extends Result {
         public Builder(Artist artist) {
             username = artist.getUsername();
             if (artist.getAlbums().isEmpty()) {
-                message = "No data to show for user " + artist.getUsername() + ".";
+                message = "No data to show for artist " + artist.getUsername() + ".";
             } else {
                 result = new LinkedHashMap<>();
             }
@@ -40,7 +40,7 @@ public class WrappedResult extends Result {
         public Builder(Host host) {
             username = host.getUsername();
             if (host.getPodcasts().isEmpty()) {
-                message = "No data to show for user " + host.getUsername() + ".";
+                message = "No data to show for host " + host.getUsername() + ".";
             } else {
                 result = new LinkedHashMap<>();
             }

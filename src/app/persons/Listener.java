@@ -22,6 +22,9 @@ public final class Listener extends User {
     private final HashMap<Podcast, Integer> podcastListenTime;
     private final HashMap<Song, Integer> songListens;
     private final HashMap<Episode, Integer> episodeListens;
+    private HashMap<Song, Integer> songsRevenueShare;
+    private double revenue;
+    private int revenueSongs;
     private boolean online;
     private Page currentPage;
     private boolean premium;
@@ -33,6 +36,7 @@ public final class Listener extends User {
         podcastListenTime = new HashMap<>();
         songListens = new HashMap<>();
         episodeListens = new HashMap<>();
+        songsRevenueShare = new HashMap<>();
         online = true;
         premium = false;
         currentPage = new Page(this);
@@ -44,6 +48,7 @@ public final class Listener extends User {
         podcastListenTime = new HashMap<>();
         songListens = new HashMap<>();
         episodeListens = new HashMap<>();
+        songsRevenueShare = new HashMap<>();
         online = true;
         premium = false;
         currentPage = new Page(this);
@@ -166,6 +171,9 @@ public final class Listener extends User {
         if (artist != null) {
             artist.setPlays(artist.getPlays() + listens);
         }
+        revenueSongs += listens;
+        songsRevenueShare.put(song, songsRevenueShare.getOrDefault(song, 0) + listens);
+
         songListens.put(song, songListens.getOrDefault(song, 0) + listens);
     }
 
@@ -268,6 +276,18 @@ public final class Listener extends User {
 
         result.getResult().put("topEpisodes", top5Episodes);
         return result;
+    }
+
+    public void splitMoney() {
+        if (premium) {
+            for (Map.Entry<Song, Integer> entry: songsRevenueShare.entrySet()) {
+                Song song = entry.getKey();
+                double sum = (double) Math.round(entry.getValue() * revenue * 100 / revenueSongs) / 100;
+                Artist artist = LibrarySingleton.getInstance().findArtistByName(song.getArtist());
+                artist.getSongProfits().put(song, artist.getSongProfits().getOrDefault(song, 0.0)
+                        + sum);
+            }
+        }
     }
 
 }

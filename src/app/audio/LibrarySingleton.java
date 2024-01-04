@@ -365,18 +365,33 @@ public final class LibrarySingleton {
         return result;
     }
 
-    public EndResult endProgram() {
+    public EndResult endProgram(final Command command) {
         EndResult result = new EndResult.Builder().build();
+        for (Listener listener: listeners) {
+            AudioPlayer player = audioPlayers.get(listener.getUsername());
+            if (player == null) {
+                continue;
+            }
+            player.setCurrentFile(player.updateStatus(command));
+            listener.splitMoney();
+        }
+        artists.forEach(artist -> artist.setStreamsRevenue(artist.getSongProfits().values().stream()
+                .mapToDouble(Double::doubleValue).sum()));
         ArrayList<Artist> filteredArtists = artists.stream()
                 .filter(artist -> artist.getPlays() > 0)
-                .sorted(Comparator.comparing(Artist::getName))
+                .sorted(
+                        Comparator
+                                .<Artist>comparingDouble(artist -> artist.getMerchRevenue() + artist.getStreamsRevenue())
+                                .reversed()
+                                .thenComparing(Artist::getName)
+                )
                 .collect(Collectors.toCollection(ArrayList::new));
-        int rank = 1;
+        int rank = 0;
         for (Artist artist: filteredArtists) {
             LinkedHashMap<String, Object> stats = new LinkedHashMap<>();
-            stats.put("songRevenue", 0f);
+            stats.put("songRevenue", artist.getStreamsRevenue());
             stats.put("merchRevenue", artist.getMerchRevenue());
-            stats.put("ranking", rank++);
+            stats.put("ranking", ++rank);
             stats.put("mostProfitableSong", "N/A");
             result.getResult().put(artist.getName(), stats);
         }

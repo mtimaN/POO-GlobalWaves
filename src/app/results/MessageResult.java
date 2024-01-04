@@ -14,7 +14,7 @@ public class MessageResult extends Result {
         private String command;
 
         public Builder(String command, int timestamp) {
-            this.username = command;
+            this.command = command;
             this.timestamp = timestamp;
         }
 
