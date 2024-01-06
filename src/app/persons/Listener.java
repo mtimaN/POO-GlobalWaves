@@ -282,10 +282,10 @@ public final class Listener extends User {
         if (premium) {
             for (Map.Entry<Song, Integer> entry: songsRevenueShare.entrySet()) {
                 Song song = entry.getKey();
-                double sum = (double) Math.round(entry.getValue() * revenue * 100 / revenueSongs) / 100;
+                double songRevenue = revenue * entry.getValue() / revenueSongs;
                 Artist artist = LibrarySingleton.getInstance().findArtistByName(song.getArtist());
-                artist.getSongProfits().put(song, artist.getSongProfits().getOrDefault(song, 0.0)
-                        + sum);
+                artist.getSongProfits().put(song.getName(), artist.getSongProfits().getOrDefault(song.getName(), 0.0)
+                        + songRevenue);
             }
         }
     }

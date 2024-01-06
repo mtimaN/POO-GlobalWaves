@@ -13,10 +13,7 @@ import main.Command;
 import app.persons.Listener;
 import app.persons.User;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Getter
@@ -389,10 +386,13 @@ public final class LibrarySingleton {
         int rank = 0;
         for (Artist artist: filteredArtists) {
             LinkedHashMap<String, Object> stats = new LinkedHashMap<>();
-            stats.put("songRevenue", artist.getStreamsRevenue());
+            stats.put("songRevenue", Math.round(artist.getStreamsRevenue() * 100.0) / 100.0);
             stats.put("merchRevenue", artist.getMerchRevenue());
             stats.put("ranking", ++rank);
-            stats.put("mostProfitableSong", "N/A");
+            stats.put("mostProfitableSong", artist.getSongProfits().entrySet().stream()
+                    .max(Map.Entry.comparingByValue())
+                    .map(Map.Entry::getKey)
+                    .orElse("N/A"));
             result.getResult().put(artist.getName(), stats);
         }
         return result;

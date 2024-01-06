@@ -27,7 +27,7 @@ public final class Artist extends User implements Searchable {
     private ArrayList<Merch> merchItems;
     private double merchRevenue;
     private double streamsRevenue;
-    private HashMap<Song, Double> songProfits;
+    private HashMap<String, Double> songProfits;
     private float plays;
 
     public Artist(final Command command) {

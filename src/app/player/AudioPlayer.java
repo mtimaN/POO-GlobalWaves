@@ -1011,6 +1011,7 @@ public final class AudioPlayer {
     }
 
     public MessageResult buyPremium(final Command command) {
+        currentFile = updateStatus(command);
         MessageResult result = new MessageResult
                 .Builder(command.getCommand(), command.getTimestamp())
                 .username(command.getUsername())
@@ -1036,6 +1037,7 @@ public final class AudioPlayer {
     }
 
     public MessageResult cancelPremium(final Command command) {
+        currentFile = updateStatus(command);
         MessageResult result = new MessageResult
                 .Builder(command.getCommand(), command.getTimestamp())
                 .username(command.getUsername())
@@ -1053,6 +1055,8 @@ public final class AudioPlayer {
         }
         listener.splitMoney();
         listener.setSongsRevenueShare(new HashMap<>());
+        listener.setRevenueSongs(0);
+        listener.setRevenue(0);
         listener.setPremium(false);
         result.setMessage(command.getUsername() + " cancelled the subscription successfully.");
         return result;
