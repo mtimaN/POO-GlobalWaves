@@ -50,11 +50,23 @@ public abstract class SongCollection implements AudioItem {
             time -= songs.get(id).getDuration();
             listener.addToSongListens(songs.get(positions.get(id)), 1);
             player.setElapsedTime(time);
-            status.setName(songs.get(id).getName());
-            status.setRemainedTime(0);
+            if (time > 10) {
+                switch (status.getRepeat()) {
+                    case "No Repeat" -> {
+                        if (id + 1 >= songs.size()) {
+                            AudioItem.setNullStatus(player);
+                        } else {
+                            player.setTrackId(id + 1);
+                        }
+                    }
+                    case "Repeat All" -> player.setTrackId((id + 1) % songs.size());
+                    case "Repeat Current Song" -> {}
+                }
+            }
             player.setAdBreakSave(new AdBreakSave(status, this));
             player.setStatus(new Status());
             player.getStatus().empty();
+            player.getStatus().setPaused(false);
             player.setAdBreakNext(false);
             player.setCurrentItem(LibrarySingleton.getInstance().findSongByName("Ad Break"));
             return (Song) player.updateStatus(command);

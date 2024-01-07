@@ -279,9 +279,6 @@ public final class Listener extends User {
     }
 
     public void splitMoney() {
-        if (!premium && revenue > 0) {
-            System.out.println("Hello");
-        }
         for (Map.Entry<Song, Integer> entry: songsRevenueShare.entrySet()) {
             Song song = entry.getKey();
             double songRevenue = revenue * entry.getValue() / revenueSongs;
@@ -292,7 +289,9 @@ public final class Listener extends User {
             artist.getSongProfits().put(song.getName(), artist.getSongProfits().getOrDefault(song.getName(), 0.0)
                     + songRevenue);
         }
+        songsRevenueShare = new HashMap<>();
         revenue = 0;
+        revenueSongs = 0;
     }
 
 }

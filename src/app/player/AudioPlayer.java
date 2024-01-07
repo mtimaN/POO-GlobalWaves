@@ -1037,8 +1037,6 @@ public final class AudioPlayer {
         }
 
         listener.splitMoney();
-        listener.setSongsRevenueShare(new HashMap<>());
-        listener.setRevenueSongs(0);
         listener.setPremium(true);
         listener.setRevenue(1e6);
         result.setMessage(command.getUsername() + " bought the subscription successfully.");
@@ -1063,9 +1061,6 @@ public final class AudioPlayer {
             return result;
         }
         listener.splitMoney();
-        listener.setSongsRevenueShare(new HashMap<>());
-        listener.setRevenueSongs(0);
-        listener.setRevenue(0);
         listener.setPremium(false);
         result.setMessage(command.getUsername() + " cancelled the subscription successfully.");
         return result;

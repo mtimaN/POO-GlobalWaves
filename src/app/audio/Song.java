@@ -107,6 +107,7 @@ public final class Song extends AudioFile implements AudioItem {
             player.setAdBreakSave(new AdBreakSave(status, player.getCurrentItem()));
             player.setStatus(new Status());
             player.getStatus().empty();
+            player.getStatus().setPaused(false);
             player.getStatus().setName("Ad Break");
             player.setAdBreakNext(false);
             player.setCurrentItem(LibrarySingleton.getInstance().findSongByName("Ad Break"));
