@@ -55,6 +55,7 @@ public final class Command {
                 if (currentPlayer.getUser() == null) {
                     break;
                 }
+                currentPlayer.setCurrentFile(currentPlayer.updateStatus(this));
                 currentPlayer.setSearchBar(new SearchBar(this));
                 currentPlayer.emptyPlayer(this);
                 outputs.add(objectMapper.valueToTree(currentPlayer.getSearchBar().search(this)));
@@ -160,6 +161,7 @@ public final class Command {
             case "buyMerch" -> outputs.add(objectMapper.valueToTree(currentPlayer.buyMerch(this)));
             case "buyPremium" -> outputs.add(objectMapper.valueToTree(currentPlayer.buyPremium(this)));
             case "cancelPremium" -> outputs.add(objectMapper.valueToTree(currentPlayer.cancelPremium(this)));
+            case "adBreak" -> outputs.add(objectMapper.valueToTree(currentPlayer.adBreak(this)));
             default -> System.err.println("Invalid command");
         }
     }

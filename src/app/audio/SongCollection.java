@@ -42,8 +42,22 @@ public abstract class SongCollection implements AudioItem {
                 }
             }
         }
+
         if (songs.get(positions.get(id)).getName().equals(status.getName())) {
             listener.addToSongListens(songs.get(positions.get(id)), -1);
+        }
+        if (player.isAdBreakNext() && time >= songs.get(id).getDuration()) {
+            time -= songs.get(id).getDuration();
+            listener.addToSongListens(songs.get(positions.get(id)), 1);
+            player.setElapsedTime(time);
+            status.setName(songs.get(id).getName());
+            status.setRemainedTime(0);
+            player.setAdBreakSave(new AdBreakSave(status, this));
+            player.setStatus(new Status());
+            player.getStatus().empty();
+            player.setAdBreakNext(false);
+            player.setCurrentItem(LibrarySingleton.getInstance().findSongByName("Ad Break"));
+            return (Song) player.updateStatus(command);
         }
         switch (status.getRepeat()) {
             case "Repeat All" -> {
@@ -59,6 +73,7 @@ public abstract class SongCollection implements AudioItem {
                             status.setName(songs.get(position).getName());
                             status.setRemainedTime(songs.get(position).getDuration() - time);
                             player.setTrackId(position);
+
                             return songs.get(position);
                         }
                     }
@@ -80,6 +95,7 @@ public abstract class SongCollection implements AudioItem {
                         status.setName(songs.get(position).getName());
                         status.setRemainedTime(songs.get(position).getDuration() - time);
                         player.setTrackId(position);
+
                         return songs.get(position);
                     }
                 }

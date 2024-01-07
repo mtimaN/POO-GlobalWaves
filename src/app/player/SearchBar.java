@@ -36,16 +36,18 @@ public final class SearchBar {
         filters = command.getFilters();
     }
 
-    void fetchSearchResults(final Command command) {
+    private void fetchSearchResults(final Command command) {
         final int maxSize = 5;
         ArrayList<Searchable> searchables;
         LibrarySingleton library = LibrarySingleton.getInstance();
         resultSearchable = new ArrayList<>();
         Listener searchListener = library.findListenerByUsername(command.getUsername());
+
         if (searchListener == null) {
             System.err.println("User doesn't exist.");
             return;
         }
+
         searchables = switch (type) {
             case "song" -> new ArrayList<>(library.getSongs());
             case "playlist" -> new ArrayList<>(searchListener.getPlaylists());
@@ -60,6 +62,7 @@ public final class SearchBar {
             }
             default -> new ArrayList<>(library.getPodcasts());
         };
+
         results = new ArrayList<>();
         for (Searchable searchable : searchables) {
             if (searchable.matchesFilter(filters)) {

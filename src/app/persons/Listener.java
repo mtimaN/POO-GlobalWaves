@@ -109,7 +109,7 @@ public final class Listener extends User {
             playlist.setVisibility("public");
         }
         result.setMessage("Visibility status updated successfully to "
-                            + playlist.getVisibility() + ".");
+                + playlist.getVisibility() + ".");
         return result;
     }
 
@@ -184,8 +184,8 @@ public final class Listener extends User {
     @Override
     public WrappedResult wrapped(Command command) {
         WrappedResult result = new WrappedResult.Builder(this)
-                                    .timestamp(command.getTimestamp())
-                                    .build();
+                .timestamp(command.getTimestamp())
+                .build();
         if (result.getMessage() != null) {
             return result;
         }
@@ -279,15 +279,20 @@ public final class Listener extends User {
     }
 
     public void splitMoney() {
-        if (premium) {
-            for (Map.Entry<Song, Integer> entry: songsRevenueShare.entrySet()) {
-                Song song = entry.getKey();
-                double songRevenue = revenue * entry.getValue() / revenueSongs;
-                Artist artist = LibrarySingleton.getInstance().findArtistByName(song.getArtist());
-                artist.getSongProfits().put(song.getName(), artist.getSongProfits().getOrDefault(song.getName(), 0.0)
-                        + songRevenue);
-            }
+        if (!premium && revenue > 0) {
+            System.out.println("Hello");
         }
+        for (Map.Entry<Song, Integer> entry: songsRevenueShare.entrySet()) {
+            Song song = entry.getKey();
+            double songRevenue = revenue * entry.getValue() / revenueSongs;
+            Artist artist = LibrarySingleton.getInstance().findArtistByName(song.getArtist());
+            if (artist == null) {
+                continue;
+            }
+            artist.getSongProfits().put(song.getName(), artist.getSongProfits().getOrDefault(song.getName(), 0.0)
+                    + songRevenue);
+        }
+        revenue = 0;
     }
 
 }

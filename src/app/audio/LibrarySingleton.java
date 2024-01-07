@@ -365,6 +365,9 @@ public final class LibrarySingleton {
     public EndResult endProgram(final Command command) {
         EndResult result = new EndResult.Builder().build();
         for (Listener listener: listeners) {
+            if (!listener.isPremium()) {
+                continue;
+            }
             AudioPlayer player = audioPlayers.get(listener.getUsername());
             if (player == null) {
                 continue;
@@ -390,7 +393,11 @@ public final class LibrarySingleton {
             stats.put("merchRevenue", artist.getMerchRevenue());
             stats.put("ranking", ++rank);
             stats.put("mostProfitableSong", artist.getSongProfits().entrySet().stream()
-                    .max(Map.Entry.comparingByValue())
+                    .filter(entry -> entry.getValue() != 0.0)
+                    .max((entry1, entry2) -> {
+                        int valueComparison = entry1.getValue().compareTo(entry2.getValue());
+                        return valueComparison != 0 ? valueComparison : entry2.getKey().compareTo(entry1.getKey());
+                    })
                     .map(Map.Entry::getKey)
                     .orElse("N/A"));
             result.getResult().put(artist.getName(), stats);

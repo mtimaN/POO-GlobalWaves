@@ -1,12 +1,6 @@
 package app.player;
 
-import app.audio.Album;
-import app.audio.AudioFile;
-import app.audio.AudioItem;
-import app.audio.LibrarySingleton;
-import app.audio.Playlist;
-import app.audio.Podcast;
-import app.audio.Song;
+import app.audio.*;
 import app.persons.Artist;
 import app.persons.Host;
 import app.persons.Listener;
@@ -31,7 +25,8 @@ public final class AudioPlayer {
     private Status status;
     private int trackId;
     private int seed;
-    private int addTime;
+    private boolean adBreakNext;
+    private AdBreakSave adBreakSave;
 
     public AudioPlayer(final Command command) {
         user = LibrarySingleton.getInstance().findUserByUsername(command.getUsername());
@@ -86,6 +81,7 @@ public final class AudioPlayer {
 
         result.setMessage("Playback loaded successfully.");
         searchBar.setSelection(null);
+        adBreakNext = false;
         return result;
     }
 
@@ -503,6 +499,7 @@ public final class AudioPlayer {
 
     /**
      * changes the page accessed by the listener
+     *
      * @param command the given command
      * @return formatted output
      */
@@ -542,6 +539,7 @@ public final class AudioPlayer {
 
     /**
      * switches the connection status of a listener
+     *
      * @param command the given command
      * @return formatted output
      */
@@ -575,6 +573,7 @@ public final class AudioPlayer {
 
     /**
      * add a new album to the library
+     *
      * @param command the given command
      * @return formatted output
      */
@@ -593,7 +592,7 @@ public final class AudioPlayer {
             return result;
         }
         Artist artist = (Artist) user;
-        for (Album album: artist.getAlbums()) {
+        for (Album album : artist.getAlbums()) {
             if (album.getName().equals(command.getName())) {
                 result.setMessage(command.getUsername()
                         + " has another album with the same name.");
@@ -613,7 +612,7 @@ public final class AudioPlayer {
 
         ArrayList<Song> librarySongs = LibrarySingleton.getInstance().getSongs();
         Album album = new Album(command);
-        for (SongInput songInput: command.getSongs()) {
+        for (SongInput songInput : command.getSongs()) {
             Song song = new Song(songInput);
             album.getSongs().add(song);
             librarySongs.add(song);
@@ -630,7 +629,7 @@ public final class AudioPlayer {
      */
     public boolean eventAlreadyExists(final String eventName) {
         Artist artist = (Artist) user;
-        for (Event event: artist.getEvents()) {
+        for (Event event : artist.getEvents()) {
             if (event.getName().equals(eventName)) {
                 return true;
             }
@@ -640,6 +639,7 @@ public final class AudioPlayer {
 
     /**
      * add event described by command
+     *
      * @param command the given command
      * @return formatted output
      */
@@ -673,6 +673,7 @@ public final class AudioPlayer {
 
     /**
      * add merch described by command, if possible
+     *
      * @param command the given command
      * @return formatted output
      */
@@ -705,6 +706,7 @@ public final class AudioPlayer {
 
     /**
      * delete the user given through command, if possible
+     *
      * @param command the given command
      * @return formatted output
      */
@@ -723,6 +725,7 @@ public final class AudioPlayer {
 
     /**
      * add the podcast described by command
+     *
      * @param command the given command
      * @return formatted output
      */
@@ -740,7 +743,7 @@ public final class AudioPlayer {
             return result;
         }
         Host host = (Host) user;
-        for (Podcast podcast: host.getPodcasts()) {
+        for (Podcast podcast : host.getPodcasts()) {
             if (podcast.getName().equals(command.getName())) {
                 result.setMessage(command.getUsername()
                         + " has another podcast with the same name.");
@@ -768,6 +771,7 @@ public final class AudioPlayer {
 
     /**
      * add the announcement described by command
+     *
      * @param command the given command
      * @return formatted output
      */
@@ -785,7 +789,7 @@ public final class AudioPlayer {
             return result;
         }
         Host host = (Host) user;
-        for (Announcement announcement: host.getAnnouncements()) {
+        for (Announcement announcement : host.getAnnouncements()) {
             if (announcement.getName().equals(command.getName())) {
                 result.setMessage(command.getUsername()
                         + " has already added an announcement with this name");
@@ -800,6 +804,7 @@ public final class AudioPlayer {
 
     /**
      * removes the announcement given through command, if possible
+     *
      * @param command the given command
      * @return formatted output
      */
@@ -818,7 +823,7 @@ public final class AudioPlayer {
         }
         Host host = (Host) user;
 
-        for (Announcement announcement: host.getAnnouncements()) {
+        for (Announcement announcement : host.getAnnouncements()) {
             if (announcement.getName().equals(command.getName())) {
                 host.getAnnouncements().remove(announcement);
                 result.setMessage(command.getUsername()
@@ -832,6 +837,7 @@ public final class AudioPlayer {
 
     /**
      * shows all the podcasts of the User, if they are a host
+     *
      * @param command the given command
      * @return formatted output
      */
@@ -841,7 +847,7 @@ public final class AudioPlayer {
         result.setUser(command.getUsername());
 
         Host host = (Host) user;
-        for (Podcast podcast: host.getPodcasts()) {
+        for (Podcast podcast : host.getPodcasts()) {
             PodcastOutput podcastOutput = new PodcastOutput(podcast);
             result.getResult().add(podcastOutput);
         }
@@ -850,6 +856,7 @@ public final class AudioPlayer {
 
     /**
      * removes the album given by command, if possible
+     *
      * @param command the given command
      * @return formatted output
      */
@@ -876,7 +883,7 @@ public final class AudioPlayer {
             return result;
         }
 
-        Album toBeDeletedAlbum  = optionalAlbum.get();
+        Album toBeDeletedAlbum = optionalAlbum.get();
         LibrarySingleton library = LibrarySingleton.getInstance();
         for (AudioPlayer audioPlayer : library.getAudioPlayers().values()) {
             audioPlayer.setCurrentFile(audioPlayer.updateStatus(command));
@@ -897,6 +904,7 @@ public final class AudioPlayer {
 
     /**
      * removes the podcast given by command, if possible
+     *
      * @param command the given command
      * @return the formatted output
      */
@@ -924,7 +932,7 @@ public final class AudioPlayer {
         }
 
         Podcast toBeDeletedPodcast = podcastOptional.get();
-        for (Podcast podcast: host.getPodcasts()) {
+        for (Podcast podcast : host.getPodcasts()) {
             if (podcast.getName().equals(command.getName())) {
                 toBeDeletedPodcast = podcast;
                 break;
@@ -950,6 +958,7 @@ public final class AudioPlayer {
 
     /**
      * removes the event given by command, if possible
+     *
      * @param command the given command
      * @return the formatted output
      */
@@ -968,7 +977,7 @@ public final class AudioPlayer {
         }
 
         Artist artist = (Artist) user;
-        for (Event event: artist.getEvents()) {
+        for (Event event : artist.getEvents()) {
             if (event.getName().equals(command.getName())) {
                 artist.getEvents().remove(event);
                 result.setMessage(command.getUsername() + " deleted the event successfully.");
@@ -998,7 +1007,7 @@ public final class AudioPlayer {
         }
 
         Artist artist = (Artist) listener.getCurrentPage().getPageOwner();
-        for (Merch merch: artist.getMerchItems()) {
+        for (Merch merch : artist.getMerchItems()) {
             if (merch.getName().equals(command.getName())) {
                 artist.setMerchRevenue(artist.getMerchRevenue() + merch.getPrice());
                 result.setMessage(listener.getUsername() + " has added new merch successfully.");
@@ -1027,7 +1036,7 @@ public final class AudioPlayer {
             return result;
         }
 
-        // TODO: nonpremium split
+        listener.splitMoney();
         listener.setSongsRevenueShare(new HashMap<>());
         listener.setRevenueSongs(0);
         listener.setPremium(true);
@@ -1059,6 +1068,29 @@ public final class AudioPlayer {
         listener.setRevenue(0);
         listener.setPremium(false);
         result.setMessage(command.getUsername() + " cancelled the subscription successfully.");
+        return result;
+    }
+
+    public MessageResult adBreak(final Command command) {
+        currentFile = updateStatus(command);
+        MessageResult result = new MessageResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
+
+        if (user == null) {
+            result.setMessage("The username " + command.getUsername() + "doesn't exist.");
+            return result;
+        }
+
+        if (currentFile == null || adBreakNext) {
+            result.setMessage(command.getUsername() + " is not playing any music.");
+            return result;
+        }
+
+        adBreakNext = true;
+        ((Listener)getUser()).setRevenue(command.getPrice());
+        result.setMessage("Ad inserted successfully.");
         return result;
     }
 }

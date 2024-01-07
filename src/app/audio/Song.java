@@ -97,8 +97,33 @@ public final class Song extends AudioFile implements AudioItem {
         Status status = player.getStatus();
         Listener listener = (Listener) player.getUser();
 
-        if (status.getName().equals(name)) {
+        if (status.getName().equals(name) && !name.equals("Ad Break")) {
             listener.addToSongListens(this, -1);
+        }
+
+        if (player.isAdBreakNext() && time >= getDuration()) {
+            player.setElapsedTime(player.getElapsedTime() - getDuration());
+            listener.addToSongListens(this, 1);
+            player.setAdBreakSave(new AdBreakSave(status, player.getCurrentItem()));
+            player.setStatus(new Status());
+            player.getStatus().empty();
+            player.getStatus().setName("Ad Break");
+            player.setAdBreakNext(false);
+            player.setCurrentItem(LibrarySingleton.getInstance().findSongByName("Ad Break"));
+            return (Song)player.updateStatus(command);
+        }
+
+        if (getName().equals("Ad Break")) {
+            if (time >= getDuration()) {
+                listener.splitMoney();
+                player.getAdBreakSave().revert(player);
+                player.setElapsedTime(player.getElapsedTime() - getDuration());
+                return (Song)player.updateStatus(command);
+            } else {
+                time -= getDuration();
+                status.setRemainedTime(-time);
+                return this;
+            }
         }
 
         if (player.getStatus().getRepeat().equals("Repeat Once")) {
