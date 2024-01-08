@@ -21,7 +21,7 @@ public class WrappedResult extends Result {
         private Map<String, Object> result = null;
         public Builder(Listener listener) {
             username = listener.getUsername();
-            if (listener.getSongListens().isEmpty()) {
+            if (listener.getSongListens().isEmpty() && listener.getEpisodeListens().isEmpty()) {
                 message = "No data to show for user " + listener.getUsername() + ".";
             } else {
                 result = new LinkedHashMap<>();

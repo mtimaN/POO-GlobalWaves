@@ -7,11 +7,13 @@ import lombok.Setter;
 @Getter @Setter
 public final class Episode extends AudioFile {
     private String description;
+    private String owner;
 
-    public Episode(final EpisodeInput input) {
+    public Episode(final EpisodeInput input, final String owner) {
         this.setName(input.getName());
         this.setDuration(input.getDuration());
-        this.setDescription(input.getDescription());
+        description = input.getDescription();
+        this.owner = owner;
     }
 
     @Override

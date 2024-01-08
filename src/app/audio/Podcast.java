@@ -1,5 +1,6 @@
 package app.audio;
 
+import app.persons.Host;
 import app.persons.User;
 import fileio.input.EpisodeInput;
 import fileio.input.PodcastInput;
@@ -24,7 +25,7 @@ public final class Podcast implements AudioItem {
         owner = input.getOwner();
         episodes = new ArrayList<>();
         for (EpisodeInput episodeInput: input.getEpisodes()) {
-            Episode episode = new Episode(episodeInput);
+            Episode episode = new Episode(episodeInput, owner);
             episodes.add(episode);
         }
     }
@@ -34,7 +35,7 @@ public final class Podcast implements AudioItem {
         this.owner = owner;
         this.episodes = new ArrayList<>();
         for (EpisodeInput episodeInput: episodes) {
-            Episode episode = new Episode(episodeInput);
+            Episode episode = new Episode(episodeInput, owner);
             this.episodes.add(episode);
         }
     }
@@ -76,9 +77,20 @@ public final class Podcast implements AudioItem {
         if (listener == null) {
             return null;
         }
+
+        int listenedBeforeTime = listener.getPodcastListenTime().get(this);
         listener.getPodcastListenTime().put(this, time);
         for (Episode episode: getEpisodes()) {
-            listener.addToEpisodeListens(episode, 1);
+            listenedBeforeTime -= episode.getDuration();
+
+            // don't count an episode twice if the listener just paused it
+            if (status.getName().equals(episode.getName())) {
+                listener.addToEpisodeListens(episode, -1);
+            }
+
+            if (listenedBeforeTime < 0) {
+                listener.addToEpisodeListens(episode, 1);
+            }
             if (time >= episode.getDuration()) {
                 time -= episode.getDuration();
             } else {

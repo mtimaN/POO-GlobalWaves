@@ -1,5 +1,6 @@
 package app.persons;
 
+import app.audio.Episode;
 import app.audio.LibrarySingleton;
 import app.audio.Podcast;
 import app.player.Announcement;
@@ -11,17 +12,24 @@ import fileio.input.UserInput;
 import lombok.Getter;
 import main.Command;
 
-import java.util.ArrayList;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Getter
 public final class Host extends User implements Searchable {
     private final ArrayList<Podcast> podcasts;
     private final ArrayList<Announcement> announcements;
+    private ArrayList<Listener> subscribers;
 
     public Host(final Command command) {
         super(command);
         podcasts = new ArrayList<>();
         announcements = new ArrayList<>();
+        for (Podcast podcast: LibrarySingleton.getInstance().getPodcasts()) {
+            if (podcast.isOwnedBy(this)) {
+                podcasts.add(podcast);
+            }
+        }
     }
     public Host(final UserInput user) {
         super(user);
@@ -83,8 +91,44 @@ public final class Host extends User implements Searchable {
 
     @Override
     public WrappedResult wrapped(Command command) {
-        return new WrappedResult.Builder(this)
+        WrappedResult result = new WrappedResult.Builder(this)
                 .timestamp(command.getTimestamp())
                 .build();
+
+        if (result.getMessage() != null) {
+            return result;
+        }
+
+        Map<String, Integer> episodeListenCounts = new HashMap<>();
+        int listeners = 0;
+        for (Listener listener: LibrarySingleton.getInstance().getListeners()) {
+            boolean listened = false;
+            for (Map.Entry<Episode, Integer> entry: listener.getEpisodeListens().entrySet()) {
+                if (entry.getKey().getOwner().equals(getName())) {
+                    episodeListenCounts.put(entry.getKey().getName(),
+                            episodeListenCounts.getOrDefault(entry.getKey().getName(), 0)
+                                    + entry.getValue());
+                    listened = true;
+                }
+            }
+            if (listened) {
+                listeners++;
+            }
+        }
+        LinkedHashMap<String, Integer> top5Episodes = episodeListenCounts.entrySet().stream()
+                .sorted(Map.Entry.<String, Integer>comparingByValue(Comparator.reverseOrder())
+                        .thenComparing(Map.Entry.comparingByKey()))
+                .limit(5)
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new
+                ));
+
+        result.getResult().put("topEpisodes", top5Episodes);
+        result.getResult().put("listeners", listeners);
+        return result;
     }
+
 }

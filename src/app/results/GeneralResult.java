@@ -3,15 +3,24 @@ package app.results;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import app.player.Notification;
+
 @Getter @Setter
-public class MessageResult extends Result {
+public class GeneralResult extends Result {
     private String message;
+    private ArrayList<Notification> notifications;
+    private ArrayList<String> result;
 
     public static class Builder {
         private final int timestamp;
         private String username;
         private String message;
         private String command;
+        private ArrayList<Notification> notifications;
+
+        private ArrayList<String> result;
 
         public Builder(String command, int timestamp) {
             this.command = command;
@@ -27,15 +36,27 @@ public class MessageResult extends Result {
             return this;
         }
 
-        public MessageResult build() {
-            return new MessageResult(this);
+        public Builder notifications() {
+            notifications = new ArrayList<>();
+            return this;
+        }
+
+        public Builder result() {
+            result = new ArrayList<>();
+            return this;
+        }
+
+        public GeneralResult build() {
+            return new GeneralResult(this);
         }
     }
 
-    private MessageResult(Builder builder) {
+    private GeneralResult(Builder builder) {
         this.message = builder.message;
         this.setTimestamp(builder.timestamp);
         this.setCommand(builder.command);
         this.setUser(builder.username);
+        this.setNotifications(builder.notifications);
+        this.setResult(builder.result);
     }
 }

@@ -17,7 +17,7 @@ import java.util.ArrayList;
 
 @Getter @Setter
 public final class Page {
-    enum Type {
+    public enum Type {
         HOME,
         LIKEDCONTENT,
         ARTIST,

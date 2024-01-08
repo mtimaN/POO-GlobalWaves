@@ -1,27 +1,34 @@
 package app.persons;
 
+import app.player.Notification;
 import app.results.WrappedResult;
 import fileio.input.UserInput;
 import lombok.Getter;
 import lombok.Setter;
 import main.Command;
+import org.checkerframework.checker.units.qual.A;
+
+import java.util.ArrayList;
 
 @Getter @Setter
 public abstract class User {
     private String username;
     private int age;
     private String city;
+    private ArrayList<Notification> notifications;
 
     public User(final Command command) {
         username = command.getUsername();
         age = command.getAge();
         city = command.getCity();
+        notifications = new ArrayList<>();
     }
 
     public User(final UserInput input) {
         this.username = input.getUsername();
         this.age = input.getAge();
         this.city = input.getCity();
+        notifications = new ArrayList<>();
     }
 
     /**

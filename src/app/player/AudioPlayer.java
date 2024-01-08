@@ -471,8 +471,6 @@ public final class AudioPlayer {
             return result;
         }
 
-        // Here I experimented with some ways to remove instanceof
-        // I'm not sure if this work well, none of the Stage 2 tests attempt this
         try {
             Playlist playlist = (Playlist) searchBar.getSelection();
             if (playlist.getOwner().equals(command.getUsername())) {
@@ -618,6 +616,10 @@ public final class AudioPlayer {
             librarySongs.add(song);
         }
         artist.getAlbums().add(album);
+        for (Listener subscriber: artist.getSubscribers()) {
+            subscriber.getNotifications().add(new Notification("New Album",
+                    "New Album from " + artist.getUsername() + "."));
+        }
         LibrarySingleton.getInstance().getAlbums().add(album);
         result.setMessage(command.getUsername() + " has added new album successfully.");
         return result;
@@ -666,7 +668,12 @@ public final class AudioPlayer {
             return result;
         }
         Event event = new Event(command);
-        ((Artist) user).getEvents().add(event);
+        Artist artist = (Artist) user;
+        artist.getEvents().add(event);
+        for (Listener subscriber: artist.getSubscribers()) {
+            subscriber.getNotifications().add(new Notification("New Event",
+                    "New Event from " + artist.getName() + "."));
+        }
         result.setMessage(user.getUsername() + " has added new event successfully.");
         return result;
     }
@@ -690,7 +697,9 @@ public final class AudioPlayer {
             result.setMessage(user.getUsername() + " is not an artist.");
             return result;
         }
-        if (((Artist) user).hasMerchWithName(command.getName())) {
+
+        Artist artist = (Artist) user;
+        if (artist.hasMerchWithName(command.getName())) {
             result.setMessage(user.getUsername() + " has merchandise with the same name.");
             return result;
         }
@@ -699,7 +708,11 @@ public final class AudioPlayer {
             return result;
         }
         Merch merch = new Merch(command);
-        ((Artist) user).getMerchItems().add(merch);
+        artist.getMerchItems().add(merch);
+        for (Listener subscriber: artist.getSubscribers()) {
+            subscriber.getNotifications().add(new Notification("New Merchandise",
+                    "New Merchandise from " + artist.getName() + "."));
+        }
         result.setMessage(user.getUsername() + " has added new merchandise successfully.");
         return result;
     }
@@ -798,6 +811,10 @@ public final class AudioPlayer {
         }
         Announcement announcement = new Announcement(command.getName(), command.getDescription());
         host.getAnnouncements().add(announcement);
+        for (Listener subscriber: host.getSubscribers()) {
+            subscriber.getNotifications().add(new Notification("New Announcement",
+                    "New Announcement from " + host.getName() + "."));
+        }
         result.setMessage(command.getUsername() + " has successfully added new announcement.");
         return result;
     }
@@ -989,8 +1006,8 @@ public final class AudioPlayer {
         return result;
     }
 
-    public MessageResult buyMerch(final Command command) {
-        MessageResult result = new MessageResult
+    public GeneralResult buyMerch(final Command command) {
+        GeneralResult result = new GeneralResult
                 .Builder(command.getCommand(), command.getTimestamp())
                 .username(command.getUsername())
                 .build();
@@ -1010,6 +1027,7 @@ public final class AudioPlayer {
         for (Merch merch : artist.getMerchItems()) {
             if (merch.getName().equals(command.getName())) {
                 artist.setMerchRevenue(artist.getMerchRevenue() + merch.getPrice());
+                listener.getBoughtMerch().add(merch.getName());
                 result.setMessage(listener.getUsername() + " has added new merch successfully.");
                 return result;
             }
@@ -1019,9 +1037,28 @@ public final class AudioPlayer {
         return result;
     }
 
-    public MessageResult buyPremium(final Command command) {
+    public GeneralResult seeMerch(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .result()
+                .username(command.getUsername())
+                .build();
+
+        if (user == null) {
+            result.setMessage("The username " + command.getUsername() + " doesn't exist.");
+            result.setResult(null);
+            return result;
+        }
+
+        Listener listener = (Listener) user;
+        for (String merch: listener.getBoughtMerch()) {
+            result.getResult().add(merch);
+        }
+        return result;
+    }
+    public GeneralResult buyPremium(final Command command) {
         currentFile = updateStatus(command);
-        MessageResult result = new MessageResult
+        GeneralResult result = new GeneralResult
                 .Builder(command.getCommand(), command.getTimestamp())
                 .username(command.getUsername())
                 .build();
@@ -1043,9 +1080,9 @@ public final class AudioPlayer {
         return result;
     }
 
-    public MessageResult cancelPremium(final Command command) {
+    public GeneralResult cancelPremium(final Command command) {
         currentFile = updateStatus(command);
-        MessageResult result = new MessageResult
+        GeneralResult result = new GeneralResult
                 .Builder(command.getCommand(), command.getTimestamp())
                 .username(command.getUsername())
                 .build();
@@ -1066,9 +1103,9 @@ public final class AudioPlayer {
         return result;
     }
 
-    public MessageResult adBreak(final Command command) {
+    public GeneralResult adBreak(final Command command) {
         currentFile = updateStatus(command);
-        MessageResult result = new MessageResult
+        GeneralResult result = new GeneralResult
                 .Builder(command.getCommand(), command.getTimestamp())
                 .username(command.getUsername())
                 .build();
@@ -1086,6 +1123,48 @@ public final class AudioPlayer {
         adBreakNext = true;
         ((Listener)getUser()).setRevenue(command.getPrice());
         result.setMessage("Ad inserted successfully.");
+        return result;
+    }
+
+    public GeneralResult subscribe(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
+
+        if (user == null) {
+            result.setMessage("The username " + command.getUsername() + " doesn't exist.");
+            return result;
+        }
+
+        Listener listener = (Listener) user;
+        if (listener.getCurrentPage().getPageType() != Page.Type.ARTIST &&
+        listener.getCurrentPage().getPageType() != Page.Type.HOST) {
+            result.setMessage("To subscribe you need to be on the page of an artist or host.");
+            return result;
+        }
+
+        if (listener.isSubscribedToPageOwner()) {
+            listener.unsubscribeFromPageOwner();
+            result.setMessage(command.getUsername() + " unsubscribed from "
+                    + listener.getCurrentPage().getPageOwner().getUsername() + " successfully.");
+        } else {
+            listener.subscribeToPageOwner();
+            result.setMessage(command.getUsername() + " subscribed to "
+                    + listener.getCurrentPage().getPageOwner().getUsername() + " successfully.");
+        }
+        return result;
+    }
+
+    public GeneralResult getNotifications(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .notifications().build();
+        for (Notification notification: user.getNotifications()) {
+            result.getNotifications().add(notification);
+        }
+        user.setNotifications(new ArrayList<>());
         return result;
     }
 }

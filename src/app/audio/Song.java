@@ -1,5 +1,6 @@
 package app.audio;
 
+import app.persons.Artist;
 import app.persons.Listener;
 import app.persons.User;
 import fileio.input.SongInput;

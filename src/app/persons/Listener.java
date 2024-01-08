@@ -23,6 +23,7 @@ public final class Listener extends User {
     private final HashMap<Song, Integer> songListens;
     private final HashMap<Episode, Integer> episodeListens;
     private HashMap<Song, Integer> songsRevenueShare;
+    private ArrayList<String> boughtMerch;
     private double revenue;
     private int revenueSongs;
     private boolean online;
@@ -37,6 +38,7 @@ public final class Listener extends User {
         songListens = new HashMap<>();
         episodeListens = new HashMap<>();
         songsRevenueShare = new HashMap<>();
+        boughtMerch = new ArrayList<>();
         online = true;
         premium = false;
         currentPage = new Page(this);
@@ -49,6 +51,7 @@ public final class Listener extends User {
         songListens = new HashMap<>();
         episodeListens = new HashMap<>();
         songsRevenueShare = new HashMap<>();
+        boughtMerch = new ArrayList<>();
         online = true;
         premium = false;
         currentPage = new Page(this);
@@ -294,4 +297,33 @@ public final class Listener extends User {
         revenueSongs = 0;
     }
 
+    public boolean isSubscribedToPageOwner() {
+        if (currentPage.getPageType() == Page.Type.ARTIST) {
+            Artist artist = (Artist) currentPage.getPageOwner();
+            return artist.getSubscribers().contains(this);
+        } else {
+            Host host = (Host) currentPage.getPageOwner();
+            return host.getSubscribers().contains(this);
+        }
+    }
+
+    public void subscribeToPageOwner() {
+        if (currentPage.getPageType() == Page.Type.ARTIST) {
+            Artist artist = (Artist) currentPage.getPageOwner();
+            artist.getSubscribers().add(this);
+        } else {
+            Host host = (Host) currentPage.getPageOwner();
+            host.getSubscribers().add(this);
+        }
+    }
+
+    public void unsubscribeFromPageOwner() {
+        if (currentPage.getPageType() == Page.Type.ARTIST) {
+            Artist artist = (Artist) currentPage.getPageOwner();
+            artist.getSubscribers().remove(this);
+        } else {
+            Host host = (Host) currentPage.getPageOwner();
+            host.getSubscribers().remove(this);
+        }
+    }
 }

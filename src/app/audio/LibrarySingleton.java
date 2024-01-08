@@ -378,7 +378,7 @@ public final class LibrarySingleton {
         artists.forEach(artist -> artist.setStreamsRevenue(artist.getSongProfits().values().stream()
                 .mapToDouble(Double::doubleValue).sum()));
         ArrayList<Artist> filteredArtists = artists.stream()
-                .filter(artist -> artist.getPlays() > 0)
+                .filter(artist -> artist.getPlays() > 0 || artist.getMerchRevenue() > 0)
                 .sorted(
                         Comparator
                                 .<Artist>comparingDouble(artist -> artist.getMerchRevenue() + artist.getStreamsRevenue())

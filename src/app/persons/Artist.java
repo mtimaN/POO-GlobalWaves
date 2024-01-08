@@ -29,11 +29,13 @@ public final class Artist extends User implements Searchable {
     private double streamsRevenue;
     private HashMap<String, Double> songProfits;
     private float plays;
+    private ArrayList<Listener> subscribers;
 
     public Artist(final Command command) {
         super(command);
         merchRevenue = 0;
         plays = 0;
+        subscribers = new ArrayList<>();
         albums = new ArrayList<>();
         events = new ArrayList<>();
         merchItems = new ArrayList<>();
@@ -43,6 +45,7 @@ public final class Artist extends User implements Searchable {
         super(user);
         merchRevenue = 0;
         plays = 0;
+        subscribers = new ArrayList<>();
         albums = new ArrayList<>();
         events = new ArrayList<>();
         merchItems = new ArrayList<>();
@@ -221,4 +224,5 @@ public final class Artist extends User implements Searchable {
         result.getResult().put("listeners", fansListenCounts.size());
         return result;
     }
+
 }
