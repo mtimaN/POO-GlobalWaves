@@ -28,7 +28,8 @@ public final class Page {
     private PageType pageType;
     private String content;
     public Page(final Listener listener) {
-        changeToHome(listener);
+        pageOwner = listener;
+        pageType = PageType.HOME;
     }
 
     /**
@@ -238,6 +239,15 @@ public final class Page {
             case HOST -> generateHostPage();
             default -> System.err.println("Unrecognized page type");
         }
+    }
+
+    public Memento takeSnapshot() {
+        return new Memento(this.pageOwner, this.pageType);
+    }
+
+    public void restore(Memento memento) {
+        this.pageOwner = memento.pageOwner;
+        this.pageType = memento.pageType;
     }
 
     public static class Memento {

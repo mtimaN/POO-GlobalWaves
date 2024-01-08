@@ -131,11 +131,15 @@ public final class Command {
             case "printCurrentPage" -> {
                 listener = myLibrary.findListenerByUsername(username);
                 if (listener == null) {
-                    System.out.println("Invalid user");
+                    System.err.println("Invalid user");
                     break;
                 }
                 outputs.add(objectMapper.valueToTree(listener.printCurrentPage(this)));
             }
+            case "previousPage" ->
+                outputs.add(objectMapper.valueToTree(currentPlayer.previousPage(this)));
+            case "nextPage" ->
+                outputs.add(objectMapper.valueToTree(currentPlayer.nextPage(this)));
             case "addEvent" -> outputs.add(objectMapper.valueToTree(currentPlayer.addEvent(this)));
             case "addMerch" -> outputs.add(objectMapper.valueToTree(currentPlayer.addMerch(this)));
             case "addPodcast" ->
@@ -170,7 +174,10 @@ public final class Command {
             case "getNotifications" ->
                     outputs.add(objectMapper.valueToTree(currentPlayer.getNotifications(this)));
             case "updateRecommendations" ->
-                    outputs.add(objectMapper.valueToTree(currentPlayer.updateRecommendations(this)));
+                    outputs.add(objectMapper.valueToTree(currentPlayer
+                            .updateRecommendations(this)));
+            case "loadRecommendations" ->
+                    outputs.add(objectMapper.valueToTree(currentPlayer.loadRecommendations(this)));
             default -> System.err.println("Invalid command");
         }
     }

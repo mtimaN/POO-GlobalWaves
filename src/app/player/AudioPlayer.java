@@ -510,15 +510,43 @@ public final class AudioPlayer {
             return null;
         }
 
-        if (command.getNextPage().equals("Home")) {
-            ((Listener) user).getCurrentPage().changeToHome((Listener) user);
-            result.setMessage(user.getUsername() + " accessed Home successfully.");
-        } else if (command.getNextPage().equals("LikedContent")) {
-            ((Listener) user).getCurrentPage().changeToLikedContent((Listener) user);
-            result.setMessage(user.getUsername() + " accessed LikedContent successfully.");
-        } else {
-            result.setMessage(user.getUsername() + " is trying to access a non-existent page.");
+        currentFile = updateStatus(command);
+        Listener listener = (Listener) user;
+
+        switch (command.getNextPage()) {
+            case "Home" -> {
+                listener.getPreviousPages().push(listener.getCurrentPage().takeSnapshot());
+                listener.setNextPages(new Stack<>());
+                listener.getCurrentPage().changeToHome((Listener) user);
+                result.setMessage(user.getUsername() + " accessed Home successfully.");
+            }
+            case "LikedContent" -> {
+                listener.getPreviousPages().push(listener.getCurrentPage().takeSnapshot());
+                listener.setNextPages(new Stack<>());
+                listener.getCurrentPage().changeToLikedContent((Listener) user);
+                result.setMessage(user.getUsername() + " accessed LikedContent successfully.");
+            }
+            case "Artist" -> {
+                listener.getPreviousPages().push(listener.getCurrentPage().takeSnapshot());
+                listener.setNextPages(new Stack<>());
+                Artist artist = LibrarySingleton.getInstance()
+                        .findArtistByName(((Song) currentFile).getArtist());
+
+                listener.getCurrentPage().changeToArtist(artist);
+                result.setMessage(user.getUsername() + " accessed Artist successfully.");
+            }
+            case "Host" -> {
+                listener.getPreviousPages().push(listener.getCurrentPage().takeSnapshot());
+                listener.setNextPages(new Stack<>());
+                Host host = LibrarySingleton.getInstance()
+                        .findHostByName(((Podcast) currentItem).getOwner());
+
+                listener.getCurrentPage().changeToHost(host);
+                result.setMessage(user.getUsername() + " accessed Host successfully.");
+            }
+            default -> result.setMessage(user.getUsername() + " is trying to access a non-existent page.");
         }
+
         return result;
     }
 
@@ -529,6 +557,7 @@ public final class AudioPlayer {
         Listener listener = (Listener) user;
         User selectedUser = (User) searchBar.getSelection();
 
+        listener.getPreviousPages().push(listener.getCurrentPage().takeSnapshot());
         if (selectedUser.canAddArtistItems()) {
             listener.getCurrentPage().changeToArtist((Artist) selectedUser);
         } else {
@@ -536,6 +565,36 @@ public final class AudioPlayer {
         }
     }
 
+    public GeneralResult loadRecommendations(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
+
+        Listener listener = (Listener) user;
+        if (!listener.isOnline()) {
+            result.setMessage(command.getUsername() + " is offline.");
+            return result;
+        }
+
+        if (listener.getRecommendation() == null) {
+            result.setMessage("No recommendations available.");
+            return result;
+        }
+
+        status.setRepeat("No Repeat");
+        status.setPaused(false);
+        status.setShuffle(false);
+        currentItem = listener.getRecommendation();
+        playTimestamp = command.getTimestamp();
+        elapsedTime = 0;
+        trackId = 0;
+
+        result.setMessage("Playback loaded successfully.");
+        adBreakNext = false;
+        return result;
+
+    }
     /**
      * switches the connection status of a listener
      *
@@ -1207,8 +1266,10 @@ public final class AudioPlayer {
                         genreSongs.add(song);
                     }
                 }
+                listener.setRecommendation(genreSongs
+                        .get(new Random(passedTime).nextInt(genreSongs.size())));
                 listener.getSongRecommendations()
-                        .add(genreSongs.get(new Random(passedTime).nextInt(genreSongs.size())));
+                        .add((Song) listener.getRecommendation());
             }
             case "random_playlist" -> {
                 HashMap<String, Integer> genreListenCounts = new HashMap<>();
@@ -1258,6 +1319,7 @@ public final class AudioPlayer {
 
                 Playlist randomPlaylist =
                         new Playlist(listener.getUsername() + "'s recommendations", playlistSongs);
+                listener.setRecommendation(randomPlaylist);
                 listener.getPlaylistRecommendations().add(randomPlaylist);
             }
             case "fans_playlist" -> {
@@ -1287,7 +1349,9 @@ public final class AudioPlayer {
                         )
                 );
                 Playlist fansPlaylist = new Playlist(artist.getName()
-                        + " Fan Club Recommendations", fanSongs);
+                        + " Fan Club recommendations", fanSongs);
+
+                listener.setRecommendation(fansPlaylist);
                 listener.getPlaylistRecommendations().add(fansPlaylist);
             }
         }
@@ -1305,5 +1369,44 @@ public final class AudioPlayer {
             }
         }
         return listenCounter;
+    }
+
+
+    public GeneralResult previousPage(Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
+
+        Listener listener = (Listener) user;
+        if (listener.getPreviousPages().isEmpty()) {
+            result.setMessage("There are no pages left to go back.");
+            return result;
+        }
+
+        listener.getNextPages().push(listener.getCurrentPage().takeSnapshot());
+        listener.getCurrentPage().restore(listener.getPreviousPages().pop());
+        result.setMessage("The user " + command.getUsername()
+                + " has navigated successfully to the previous page.");
+        return result;
+    }
+
+    public GeneralResult nextPage(Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
+
+        Listener listener = (Listener) user;
+        if (listener.getNextPages().isEmpty()) {
+            result.setMessage("There are no pages left to go forward.");
+            return result;
+        }
+
+        listener.getPreviousPages().push(listener.getCurrentPage().takeSnapshot());
+        listener.getCurrentPage().restore(listener.getNextPages().pop());
+        result.setMessage("The user " + command.getUsername()
+                + " has navigated successfully to the next page.");
+        return result;
     }
 }

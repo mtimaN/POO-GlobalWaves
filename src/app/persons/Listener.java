@@ -31,6 +31,9 @@ public final class Listener extends User {
     private boolean premium;
     private ArrayList<Song> songRecommendations;
     private ArrayList<Playlist> playlistRecommendations;
+    private AudioItem recommendation;
+    private Stack<Page.Memento> previousPages;
+    private Stack<Page.Memento> nextPages;
 
     public Listener(final Command command) {
         super(command);
@@ -43,6 +46,8 @@ public final class Listener extends User {
         boughtMerch = new ArrayList<>();
         songRecommendations = new ArrayList<>();
         playlistRecommendations = new ArrayList<>();
+        previousPages = new Stack<>();
+        nextPages = new Stack<>();
         online = true;
         premium = false;
         currentPage = new Page(this);
@@ -58,6 +63,8 @@ public final class Listener extends User {
         boughtMerch = new ArrayList<>();
         songRecommendations = new ArrayList<>();
         playlistRecommendations = new ArrayList<>();
+        previousPages = new Stack<>();
+        nextPages = new Stack<>();
         online = true;
         premium = false;
         currentPage = new Page(this);
@@ -332,4 +339,5 @@ public final class Listener extends User {
             host.getSubscribers().remove(this);
         }
     }
+
 }
