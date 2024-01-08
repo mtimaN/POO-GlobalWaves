@@ -169,6 +169,8 @@ public final class Command {
                     outputs.add(objectMapper.valueToTree(currentPlayer.subscribe(this)));
             case "getNotifications" ->
                     outputs.add(objectMapper.valueToTree(currentPlayer.getNotifications(this)));
+            case "updateRecommendations" ->
+                    outputs.add(objectMapper.valueToTree(currentPlayer.updateRecommendations(this)));
             default -> System.err.println("Invalid command");
         }
     }

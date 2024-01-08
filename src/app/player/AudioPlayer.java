@@ -13,6 +13,7 @@ import lombok.Setter;
 import main.Command;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Getter @Setter
 public final class AudioPlayer {
@@ -26,7 +27,7 @@ public final class AudioPlayer {
     private int trackId;
     private int seed;
     private boolean adBreakNext;
-    private AdBreakSave adBreakSave;
+    private AdBreakMemento adBreakMemento;
 
     public AudioPlayer(final Command command) {
         user = LibrarySingleton.getInstance().findUserByUsername(command.getUsername());
@@ -1018,7 +1019,7 @@ public final class AudioPlayer {
 
         Listener listener = (Listener) user;
 
-        if (listener.getCurrentPage().getPageType() != Page.Type.ARTIST) {
+        if (listener.getCurrentPage().getPageType() != Page.PageType.ARTIST) {
             result.setMessage("Cannot buy merch from this page.");
             return result;
         }
@@ -1138,8 +1139,8 @@ public final class AudioPlayer {
         }
 
         Listener listener = (Listener) user;
-        if (listener.getCurrentPage().getPageType() != Page.Type.ARTIST &&
-        listener.getCurrentPage().getPageType() != Page.Type.HOST) {
+        if (listener.getCurrentPage().getPageType() != Page.PageType.ARTIST &&
+        listener.getCurrentPage().getPageType() != Page.PageType.HOST) {
             result.setMessage("To subscribe you need to be on the page of an artist or host.");
             return result;
         }
@@ -1166,5 +1167,143 @@ public final class AudioPlayer {
         }
         user.setNotifications(new ArrayList<>());
         return result;
+    }
+
+    public GeneralResult updateRecommendations(Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
+
+        if (user == null) {
+            result.setMessage("The username " + command.getUsername() + " doesn't exist.");
+            return result;
+        }
+
+        Listener listener;
+        try {
+            listener = (Listener) user;
+        } catch (Exception e) {
+            result.setMessage(command.getUsername() + " is not a normal user.");
+            return result;
+        }
+
+        currentFile = updateStatus(command);
+        if (currentFile == null) {
+            result.setMessage("No new recommendations were found");
+            return result;
+        }
+        switch (command.getRecommendationType()) {
+            case "random_song" -> {
+                int passedTime = currentFile.getDuration() - status.getRemainedTime();
+                if (passedTime < 30) {
+                    result.setMessage("No new recommendations were found");
+                    return result;
+                }
+                Song currentSong = (Song) currentFile;
+                ArrayList<Song> genreSongs = new ArrayList<>();
+                for (Song song: LibrarySingleton.getInstance().getSongs()) {
+                    if (song.getGenre().equals(currentSong.getGenre())) {
+                        genreSongs.add(song);
+                    }
+                }
+                listener.getSongRecommendations()
+                        .add(genreSongs.get(new Random(passedTime).nextInt(genreSongs.size())));
+            }
+            case "random_playlist" -> {
+                HashMap<String, Integer> genreListenCounts = new HashMap<>();
+
+                ArrayList<Song> usedSongs = new ArrayList<>(listener.getLikedSongs());
+                for (Playlist playlist: listener.getPlaylists()) {
+                    usedSongs.addAll(playlist.getSongs());
+                }
+                for (Playlist playlist: LibrarySingleton.getInstance().getPlaylists()) {
+                    if (playlist.getFollowers().contains(listener)) {
+                        usedSongs.addAll(playlist.getSongs());
+                    }
+                }
+
+                for (Song song: usedSongs) {
+                    String genre = song.getGenre();
+                    genreListenCounts.put(genre, genreListenCounts.getOrDefault(genre, 0) + 1);
+                }
+
+                ArrayList<String> top3Genres = genreListenCounts.entrySet().stream()
+                        .sorted(Map.Entry.<String, Integer>comparingByValue(Comparator.reverseOrder())
+                                .thenComparing(Map.Entry.comparingByKey()))
+                        .limit(3)
+                        .map(Map.Entry::getKey)
+                        .collect(Collectors.toCollection(ArrayList::new));
+
+                ArrayList<Song> playlistSongs = usedSongs.stream()
+                        .filter(song -> song.getGenre().equals(top3Genres.get(0)))
+                        .sorted(Comparator.comparingInt(Song::getLikes).reversed())
+                        .limit(5)
+                        .collect(Collectors.toCollection(ArrayList::new));
+
+                if (top3Genres.size() > 1) {
+                    playlistSongs.addAll(usedSongs.stream()
+                            .filter(song -> song.getGenre().equals(top3Genres.get(1)))
+                            .sorted(Comparator.comparingInt(Song::getLikes).reversed())
+                            .limit(3)
+                            .collect(Collectors.toCollection(ArrayList::new)));
+                }
+                if (top3Genres.size() == 3) {
+                    playlistSongs.addAll(usedSongs.stream()
+                            .filter(song -> song.getGenre().equals(top3Genres.get(2)))
+                            .sorted(Comparator.comparingInt(Song::getLikes).reversed())
+                            .limit(2)
+                            .collect(Collectors.toCollection(ArrayList::new)));
+                }
+
+                Playlist randomPlaylist =
+                        new Playlist(listener.getUsername() + "'s recommendations", playlistSongs);
+                listener.getPlaylistRecommendations().add(randomPlaylist);
+            }
+            case "fans_playlist" -> {
+                Artist artist = LibrarySingleton.getInstance()
+                        .findArtistByName(((Song) currentFile).getArtist());
+                if (artist == null) {
+                    return null;
+                }
+                Map<Listener, Integer> fansListenCounts = new HashMap<>();
+                for (Listener fan : LibrarySingleton.getInstance().getListeners()) {
+                    int listenCounter = getFanListens(listener, artist);
+                    if (listenCounter > 0) {
+                        fansListenCounts.put(fan, listenCounter);
+                    }
+                }
+                ArrayList<Listener> top5Fans = fansListenCounts.entrySet().stream()
+                        .sorted(Map.Entry.<Listener, Integer>comparingByValue().reversed())
+                        .limit(5)
+                        .map(Map.Entry::getKey)
+                        .collect(Collectors.toCollection(ArrayList::new));
+                ArrayList<Song> fanSongs = new ArrayList<>();
+                top5Fans.forEach(fan ->
+                        fanSongs.addAll(fan.getLikedSongs().stream()
+                                .sorted(Comparator.comparingInt(Song::getLikes).reversed())
+                                .limit(5)
+                                .collect(Collectors.toCollection(ArrayList::new))
+                        )
+                );
+                Playlist fansPlaylist = new Playlist(artist.getName()
+                        + " Fan Club Recommendations", fanSongs);
+                listener.getPlaylistRecommendations().add(fansPlaylist);
+            }
+        }
+        result.setMessage("The recommendations for user "
+                + listener.getUsername() + " have been updated successfully.");
+        return result;
+    }
+
+    private static int getFanListens(Listener listener, Artist artist) {
+        int listenCounter = 0;
+        for (Map.Entry<Song, Integer> entry : listener.getSongListens().entrySet()) {
+            if (entry.getKey().getArtist().equals(artist.getUsername())) {
+                int listens = entry.getValue();
+                listenCounter += listens;
+            }
+        }
+        return listenCounter;
     }
 }

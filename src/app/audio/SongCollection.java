@@ -63,7 +63,7 @@ public abstract class SongCollection implements AudioItem {
                     case "Repeat Current Song" -> {}
                 }
             }
-            player.setAdBreakSave(new AdBreakSave(status, this));
+            player.setAdBreakMemento(new AdBreakMemento(status, this));
             player.setStatus(new Status());
             player.getStatus().empty();
             player.getStatus().setPaused(false);

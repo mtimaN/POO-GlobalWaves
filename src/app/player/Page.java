@@ -17,14 +17,15 @@ import java.util.ArrayList;
 
 @Getter @Setter
 public final class Page {
-    public enum Type {
+    public enum PageType {
         HOME,
         LIKEDCONTENT,
         ARTIST,
         HOST
     }
+
     private User pageOwner;
-    private Type pageType;
+    private PageType pageType;
     private String content;
     public Page(final Listener listener) {
         changeToHome(listener);
@@ -36,7 +37,7 @@ public final class Page {
      */
     public void changeToHome(final Listener listener) {
         pageOwner = listener;
-        pageType = Type.HOME;
+        pageType = PageType.HOME;
     }
 
     /**
@@ -70,6 +71,22 @@ public final class Page {
             }
             contentBuilder.append(followedPlaylists.get(i).getName());
         }
+        contentBuilder.append("]\n\nSong recommendations:\n\t[");
+        size = Math.min(listener.getSongRecommendations().size(), maxSize);
+        for (int i = 0; i < size; ++i) {
+            if (i != 0) {
+                contentBuilder.append(", ");
+            }
+            contentBuilder.append(listener.getSongRecommendations().get(i).getName());
+        }
+        contentBuilder.append("]\n\nPlaylists recommendations:\n\t[");
+        size = Math.min(listener.getPlaylistRecommendations().size(), maxSize);
+        for (int i = 0; i < size; ++i) {
+            if (i != 0) {
+                contentBuilder.append(", ");
+            }
+            contentBuilder.append(listener.getPlaylistRecommendations().get(i).getName());
+        }
         contentBuilder.append("]");
         content = contentBuilder.toString();
     }
@@ -80,7 +97,7 @@ public final class Page {
      */
     public void changeToLikedContent(final Listener listener) {
         pageOwner = listener;
-        pageType = Type.LIKEDCONTENT;
+        pageType = PageType.LIKEDCONTENT;
     }
 
     /**
@@ -123,7 +140,7 @@ public final class Page {
      */
     public void changeToArtist(final Artist artist) {
         pageOwner = artist;
-        pageType = Type.ARTIST;
+        pageType = PageType.ARTIST;
     }
 
     /**
@@ -169,7 +186,7 @@ public final class Page {
      */
     public void changeToHost(final Host host) {
         pageOwner = host;
-        pageType = Type.HOST;
+        pageType = PageType.HOST;
     }
 
     /**
@@ -220,6 +237,24 @@ public final class Page {
             case ARTIST -> generateArtistPage();
             case HOST -> generateHostPage();
             default -> System.err.println("Unrecognized page type");
+        }
+    }
+
+    public static class Memento {
+        private final User pageOwner;
+        private final PageType pageType;
+
+        private Memento(User pageOwner, PageType pageType) {
+            this.pageOwner = pageOwner;
+            this.pageType = pageType;
+        }
+
+        private User getSavedOwner() {
+            return pageOwner;
+        }
+
+        private PageType getSavedPageType() {
+            return pageType;
         }
     }
 }

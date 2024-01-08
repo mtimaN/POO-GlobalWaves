@@ -1,6 +1,5 @@
 package app.audio;
 
-import app.persons.Artist;
 import app.persons.Listener;
 import app.persons.User;
 import fileio.input.SongInput;
@@ -105,7 +104,7 @@ public final class Song extends AudioFile implements AudioItem {
         if (player.isAdBreakNext() && time >= getDuration()) {
             player.setElapsedTime(player.getElapsedTime() - getDuration());
             listener.addToSongListens(this, 1);
-            player.setAdBreakSave(new AdBreakSave(status, player.getCurrentItem()));
+            player.setAdBreakMemento(new AdBreakMemento(status, player.getCurrentItem()));
             player.setStatus(new Status());
             player.getStatus().empty();
             player.getStatus().setPaused(false);
@@ -116,9 +115,9 @@ public final class Song extends AudioFile implements AudioItem {
         }
 
         if (getName().equals("Ad Break")) {
+            listener.splitMoney();
             if (time >= getDuration()) {
-                listener.splitMoney();
-                player.getAdBreakSave().revert(player);
+                player.getAdBreakMemento().revert(player);
                 player.setElapsedTime(player.getElapsedTime() - getDuration());
                 return (Song)player.updateStatus(command);
             } else {

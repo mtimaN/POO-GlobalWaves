@@ -6,11 +6,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class AdBreakSave {
+public class AdBreakMemento {
     private Status status;
     private AudioItem currentItem;
 
-    public AdBreakSave(Status status, AudioItem currentItem) {
+    public AdBreakMemento(Status status, AudioItem currentItem) {
         this.status = status;
         this.currentItem = currentItem;
     }

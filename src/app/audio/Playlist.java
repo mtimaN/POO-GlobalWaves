@@ -8,6 +8,7 @@ import app.player.Filter;
 import app.persons.Listener;
 import app.results.CreatePlaylistResult;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 @Getter @Setter
@@ -16,6 +17,12 @@ public final class Playlist extends SongCollection {
     private String visibility;
     private final int timestamp;
 
+    public Playlist(String name, ArrayList<Song> songs) {
+        this.name = name;
+        timestamp = -1;
+        this.songs = songs;
+        visibility = "private";
+    }
     private Playlist(final Command command) {
         this.name = command.getPlaylistName();
         songs = new ArrayList<>();

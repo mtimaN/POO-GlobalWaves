@@ -29,6 +29,8 @@ public final class Listener extends User {
     private boolean online;
     private Page currentPage;
     private boolean premium;
+    private ArrayList<Song> songRecommendations;
+    private ArrayList<Playlist> playlistRecommendations;
 
     public Listener(final Command command) {
         super(command);
@@ -39,6 +41,8 @@ public final class Listener extends User {
         episodeListens = new HashMap<>();
         songsRevenueShare = new HashMap<>();
         boughtMerch = new ArrayList<>();
+        songRecommendations = new ArrayList<>();
+        playlistRecommendations = new ArrayList<>();
         online = true;
         premium = false;
         currentPage = new Page(this);
@@ -52,6 +56,8 @@ public final class Listener extends User {
         episodeListens = new HashMap<>();
         songsRevenueShare = new HashMap<>();
         boughtMerch = new ArrayList<>();
+        songRecommendations = new ArrayList<>();
+        playlistRecommendations = new ArrayList<>();
         online = true;
         premium = false;
         currentPage = new Page(this);
@@ -298,7 +304,7 @@ public final class Listener extends User {
     }
 
     public boolean isSubscribedToPageOwner() {
-        if (currentPage.getPageType() == Page.Type.ARTIST) {
+        if (currentPage.getPageType() == Page.PageType.ARTIST) {
             Artist artist = (Artist) currentPage.getPageOwner();
             return artist.getSubscribers().contains(this);
         } else {
@@ -308,7 +314,7 @@ public final class Listener extends User {
     }
 
     public void subscribeToPageOwner() {
-        if (currentPage.getPageType() == Page.Type.ARTIST) {
+        if (currentPage.getPageType() == Page.PageType.ARTIST) {
             Artist artist = (Artist) currentPage.getPageOwner();
             artist.getSubscribers().add(this);
         } else {
@@ -318,7 +324,7 @@ public final class Listener extends User {
     }
 
     public void unsubscribeFromPageOwner() {
-        if (currentPage.getPageType() == Page.Type.ARTIST) {
+        if (currentPage.getPageType() == Page.PageType.ARTIST) {
             Artist artist = (Artist) currentPage.getPageOwner();
             artist.getSubscribers().remove(this);
         } else {
