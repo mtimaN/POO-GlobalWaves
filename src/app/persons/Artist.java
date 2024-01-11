@@ -222,6 +222,11 @@ public final class Artist extends User implements Searchable {
         result.getResult().put("topFans", top5Fans);
 
         result.getResult().put("listeners", fansListenCounts.size());
+
+        if (fansListenCounts.isEmpty()) {
+            result.setResult(null);
+            result.setMessage("No data to show for artist " + getUsername() + ".");
+        }
         return result;
     }
 

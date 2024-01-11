@@ -1317,6 +1317,11 @@ public final class AudioPlayer {
                             .collect(Collectors.toCollection(ArrayList::new)));
                 }
 
+                if (playlistSongs.isEmpty()) {
+                    result.setMessage("No new recommendations were found");
+                    return result;
+                }
+
                 Playlist randomPlaylist =
                         new Playlist(listener.getUsername() + "'s recommendations", playlistSongs);
                 listener.setRecommendation(randomPlaylist);
@@ -1340,7 +1345,9 @@ public final class AudioPlayer {
                         .limit(5)
                         .map(Map.Entry::getKey)
                         .collect(Collectors.toCollection(ArrayList::new));
+
                 ArrayList<Song> fanSongs = new ArrayList<>();
+
                 top5Fans.forEach(fan ->
                         fanSongs.addAll(fan.getLikedSongs().stream()
                                 .sorted(Comparator.comparingInt(Song::getLikes).reversed())
@@ -1348,6 +1355,12 @@ public final class AudioPlayer {
                                 .collect(Collectors.toCollection(ArrayList::new))
                         )
                 );
+
+                if (fanSongs.isEmpty()) {
+                    result.setMessage("No new recommendations were found");
+                    return result;
+                }
+
                 Playlist fansPlaylist = new Playlist(artist.getName()
                         + " Fan Club recommendations", fanSongs);
 

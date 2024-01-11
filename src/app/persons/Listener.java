@@ -165,11 +165,11 @@ public final class Listener extends User {
             if (player.getCurrentItem() == null) {
                 continue;
             }
-            if (player.getCurrentItem().getClass().equals(Playlist.class)) {
+            try {
                 if (((Playlist) player.getCurrentItem()).getOwner().equals(getUsername())) {
                     return getUsername() + " can't be deleted.";
                 }
-            }
+            } catch (Exception ignored) {}
         }
         library.getListeners().remove(this);
         library.getAudioPlayers().remove(getUsername());

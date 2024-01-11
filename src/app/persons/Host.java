@@ -128,6 +128,11 @@ public final class Host extends User implements Searchable {
 
         result.getResult().put("topEpisodes", top5Episodes);
         result.getResult().put("listeners", listeners);
+
+        if (listeners == 0) {
+            result.setResult(null);
+            result.setMessage("No data to show for host " + getUsername() + ".");
+        }
         return result;
     }
 
