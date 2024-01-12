@@ -11,6 +11,9 @@ public final class Status {
     private boolean shuffle;
     private boolean paused;
 
+    /**
+     * empties the status
+     */
     public void empty() {
         name = "";
         paused = true;

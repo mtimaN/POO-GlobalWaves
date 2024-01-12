@@ -1,19 +1,38 @@
 package app.player;
 
-import app.audio.*;
+import app.audio.AdBreakMemento;
+import app.audio.Album;
+import app.audio.AudioFile;
+import app.audio.AudioItem;
+import app.audio.LibrarySingleton;
+import app.audio.Playlist;
+import app.audio.Podcast;
+import app.audio.Song;
+import app.output.format_classes.PodcastOutput;
+import app.output.results.GeneralResult;
+import app.output.results.ShowPodcastsResult;
 import app.persons.Artist;
 import app.persons.Host;
 import app.persons.Listener;
 import app.persons.User;
-import app.results.*;
+
 import fileio.input.EpisodeInput;
 import fileio.input.SongInput;
 import lombok.Getter;
 import lombok.Setter;
 import main.Command;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
+import java.util.Stack;
 import java.util.stream.Collectors;
+
+import static java.util.Map.Entry;
 
 @Getter @Setter
 public final class AudioPlayer {
@@ -572,7 +591,8 @@ public final class AudioPlayer {
                 listener.getCurrentPage().changeToHost(host);
                 result.setMessage(user.getUsername() + " accessed Host successfully.");
             }
-            default -> result.setMessage(user.getUsername() + " is trying to access a non-existent page.");
+            default -> result.setMessage(user.getUsername()
+                    + " is trying to access a non-existent page.");
         }
 
         return result;
@@ -593,6 +613,11 @@ public final class AudioPlayer {
         }
     }
 
+    /**
+     * load the player with the last recommended audio item
+     * @param command the given command
+     * @return result formatted for output
+     */
     public GeneralResult loadRecommendations(final Command command) {
         GeneralResult result = new GeneralResult
                 .Builder(command.getCommand(), command.getTimestamp())
@@ -778,10 +803,11 @@ public final class AudioPlayer {
      * @param command the given command
      * @return formatted output
      */
-    public AddMerchResult addMerch(final Command command) {
-        AddMerchResult result = new AddMerchResult();
-        result.setTimestamp(command.getTimestamp());
-        result.setUser(command.getUsername());
+    public GeneralResult addMerch(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
 
         if (user == null) {
             result.setMessage("The username " + command.getUsername() + " doesn't exist.");
@@ -817,10 +843,11 @@ public final class AudioPlayer {
      * @param command the given command
      * @return formatted output
      */
-    public DeleteUserResult deleteUser(final Command command) {
-        DeleteUserResult result = new DeleteUserResult();
-        result.setTimestamp(command.getTimestamp());
-        result.setUser(command.getUsername());
+    public GeneralResult deleteUser(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
 
         if (user == null) {
             result.setMessage("The username " + command.getUsername() + " doesn't exist.");
@@ -836,10 +863,11 @@ public final class AudioPlayer {
      * @param command the given command
      * @return formatted output
      */
-    public AddPodcastResult addPodcast(final Command command) {
-        AddPodcastResult result = new AddPodcastResult();
-        result.setTimestamp(command.getTimestamp());
-        result.setUser(command.getUsername());
+    public GeneralResult addPodcast(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
 
         if (user == null) {
             result.setMessage("The username " + command.getUsername() + " doesn't exist.");
@@ -882,10 +910,11 @@ public final class AudioPlayer {
      * @param command the given command
      * @return formatted output
      */
-    public AddAnnouncementResult addAnnouncement(final Command command) {
-        AddAnnouncementResult result = new AddAnnouncementResult();
-        result.setTimestamp(command.getTimestamp());
-        result.setUser(command.getUsername());
+    public GeneralResult addAnnouncement(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
 
         if (user == null) {
             result.setMessage("The username " + command.getUsername() + " doesn't exist.");
@@ -919,10 +948,11 @@ public final class AudioPlayer {
      * @param command the given command
      * @return formatted output
      */
-    public RemoveAnnouncementResult removeAnnouncement(final Command command) {
-        RemoveAnnouncementResult result = new RemoveAnnouncementResult();
-        result.setTimestamp(command.getTimestamp());
-        result.setUser(command.getUsername());
+    public GeneralResult removeAnnouncement(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
 
         if (user == null) {
             result.setMessage("The username " + command.getUsername() + " doesn't exist.");
@@ -971,10 +1001,11 @@ public final class AudioPlayer {
      * @param command the given command
      * @return formatted output
      */
-    public RemoveAlbumResult removeAlbum(final Command command) {
-        RemoveAlbumResult result = new RemoveAlbumResult();
-        result.setTimestamp(command.getTimestamp());
-        result.setUser(command.getUsername());
+    public GeneralResult removeAlbum(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
 
         if (user == null) {
             result.setMessage("The username " + command.getUsername() + " doesn't exist.");
@@ -1019,10 +1050,11 @@ public final class AudioPlayer {
      * @param command the given command
      * @return the formatted output
      */
-    public RemovePodcastResult removePodcast(final Command command) {
-        RemovePodcastResult result = new RemovePodcastResult();
-        result.setTimestamp(command.getTimestamp());
-        result.setUser(command.getUsername());
+    public GeneralResult removePodcast(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
 
         if (user == null) {
             result.setMessage("The username " + command.getUsername() + " doesn't exist.");
@@ -1073,10 +1105,11 @@ public final class AudioPlayer {
      * @param command the given command
      * @return the formatted output
      */
-    public RemoveEventResult removeEvent(final Command command) {
-        RemoveEventResult result = new RemoveEventResult();
-        result.setTimestamp(command.getTimestamp());
-        result.setUser(command.getUsername());
+    public GeneralResult removeEvent(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
 
         if (user == null) {
             result.setMessage("The username " + command.getUsername() + " doesn't exist.");
@@ -1100,6 +1133,11 @@ public final class AudioPlayer {
         return result;
     }
 
+    /**
+     * buy merch from an artist
+     * @param command the given command
+     * @return result formatted for output
+     */
     public GeneralResult buyMerch(final Command command) {
         GeneralResult result = new GeneralResult
                 .Builder(command.getCommand(), command.getTimestamp())
@@ -1131,6 +1169,11 @@ public final class AudioPlayer {
         return result;
     }
 
+    /**
+     * see the merch bought by the user
+     * @param command the given command
+     * @return result formatted for output
+     */
     public GeneralResult seeMerch(final Command command) {
         GeneralResult result = new GeneralResult
                 .Builder(command.getCommand(), command.getTimestamp())
@@ -1150,7 +1193,14 @@ public final class AudioPlayer {
         }
         return result;
     }
+
+    /**
+     * buy premium for the user
+     * @param command the given command
+     * @return result formatted for output
+     */
     public GeneralResult buyPremium(final Command command) {
+        final double premiumRevenue = 1e6;
         currentFile = updateStatus(command);
         GeneralResult result = new GeneralResult
                 .Builder(command.getCommand(), command.getTimestamp())
@@ -1168,11 +1218,16 @@ public final class AudioPlayer {
         }
 
         listener.setPremium(true);
-        listener.setRevenue(1e6);
+        listener.setRevenue(premiumRevenue);
         result.setMessage(command.getUsername() + " bought the subscription successfully.");
         return result;
     }
 
+    /**
+     * cancel the premium subscription
+     * @param command the given command
+     * @return result formatted for output
+     */
     public GeneralResult cancelPremium(final Command command) {
         currentFile = updateStatus(command);
         GeneralResult result = new GeneralResult
@@ -1196,6 +1251,11 @@ public final class AudioPlayer {
         return result;
     }
 
+    /**
+     * insert an adBreak
+     * @param command the given command
+     * @return result formatted for output
+     */
     public GeneralResult adBreak(final Command command) {
         currentFile = updateStatus(command);
         GeneralResult result = new GeneralResult
@@ -1214,11 +1274,16 @@ public final class AudioPlayer {
         }
 
         adBreakNext = true;
-        ((Listener)getUser()).setRevenue(command.getPrice());
+        ((Listener) user).setRevenue(command.getPrice());
         result.setMessage("Ad inserted successfully.");
         return result;
     }
 
+    /**
+     * subscribe to the current page owner
+     * @param command the given command
+     * @return result formatted for output
+     */
     public GeneralResult subscribe(final Command command) {
         GeneralResult result = new GeneralResult
                 .Builder(command.getCommand(), command.getTimestamp())
@@ -1231,8 +1296,8 @@ public final class AudioPlayer {
         }
 
         Listener listener = (Listener) user;
-        if (listener.getCurrentPage().getPageType() != Page.PageType.ARTIST &&
-        listener.getCurrentPage().getPageType() != Page.PageType.HOST) {
+        if (listener.getCurrentPage().getPageType() != Page.PageType.ARTIST
+                && listener.getCurrentPage().getPageType() != Page.PageType.HOST) {
             result.setMessage("To subscribe you need to be on the page of an artist or host.");
             return result;
         }
@@ -1249,6 +1314,11 @@ public final class AudioPlayer {
         return result;
     }
 
+    /**
+     * get the notifications of the user
+     * @param command the given command
+     * @return result formatted for output
+     */
     public GeneralResult getNotifications(final Command command) {
         GeneralResult result = new GeneralResult
                 .Builder(command.getCommand(), command.getTimestamp())
@@ -1261,7 +1331,15 @@ public final class AudioPlayer {
         return result;
     }
 
-    public GeneralResult updateRecommendations(Command command) {
+    /**
+     * update the recommendations of the listener
+     * @param command the given command
+     * @return result formatted for output
+     */
+    public GeneralResult updateRecommendations(final Command command) {
+        final int topSize = 5;
+        final int topGenreSize = 3;
+        final int minimumSecondsPassed = 30;
         GeneralResult result = new GeneralResult
                 .Builder(command.getCommand(), command.getTimestamp())
                 .username(command.getUsername())
@@ -1281,6 +1359,7 @@ public final class AudioPlayer {
         }
 
         currentFile = updateStatus(command);
+
         if (currentFile == null) {
             result.setMessage("No new recommendations were found");
             return result;
@@ -1288,7 +1367,7 @@ public final class AudioPlayer {
         switch (command.getRecommendationType()) {
             case "random_song" -> {
                 int passedTime = currentFile.getDuration() - status.getRemainedTime();
-                if (passedTime < 30) {
+                if (passedTime < minimumSecondsPassed) {
                     result.setMessage("No new recommendations were found");
                     return result;
                 }
@@ -1323,26 +1402,26 @@ public final class AudioPlayer {
                 }
 
                 ArrayList<String> top3Genres = genreListenCounts.entrySet().stream()
-                        .sorted(Map.Entry.<String, Integer>comparingByValue(Comparator.reverseOrder())
-                                .thenComparing(Map.Entry.comparingByKey()))
-                        .limit(3)
-                        .map(Map.Entry::getKey)
+                        .sorted(Entry.<String, Integer>comparingByValue(Comparator.reverseOrder())
+                                .thenComparing(Entry.comparingByKey()))
+                        .limit(topGenreSize)
+                        .map(Entry::getKey)
                         .collect(Collectors.toCollection(ArrayList::new));
 
                 ArrayList<Song> playlistSongs = usedSongs.stream()
                         .filter(song -> song.getGenre().equals(top3Genres.get(0)))
                         .sorted(Comparator.comparingInt(Song::getLikes).reversed())
-                        .limit(5)
+                        .limit(topSize)
                         .collect(Collectors.toCollection(ArrayList::new));
 
                 if (top3Genres.size() > 1) {
                     playlistSongs.addAll(usedSongs.stream()
                             .filter(song -> song.getGenre().equals(top3Genres.get(1)))
                             .sorted(Comparator.comparingInt(Song::getLikes).reversed())
-                            .limit(3)
+                            .limit(topGenreSize)
                             .collect(Collectors.toCollection(ArrayList::new)));
                 }
-                if (top3Genres.size() == 3) {
+                if (top3Genres.size() == topGenreSize) {
                     playlistSongs.addAll(usedSongs.stream()
                             .filter(song -> song.getGenre().equals(top3Genres.get(2)))
                             .sorted(Comparator.comparingInt(Song::getLikes).reversed())
@@ -1374,9 +1453,10 @@ public final class AudioPlayer {
                     }
                 }
                 ArrayList<Listener> top5Fans = fansListenCounts.entrySet().stream()
-                        .sorted(Map.Entry.<Listener, Integer>comparingByValue().reversed())
-                        .limit(5)
-                        .map(Map.Entry::getKey)
+                        .sorted(Entry.<Listener, Integer>comparingByValue().reversed()
+                                .thenComparing(entry -> entry.getKey().getUsername()))
+                        .limit(topSize)
+                        .map(Entry::getKey)
                         .collect(Collectors.toCollection(ArrayList::new));
 
                 ArrayList<Song> fanSongs = new ArrayList<>();
@@ -1384,7 +1464,7 @@ public final class AudioPlayer {
                 top5Fans.forEach(fan ->
                         fanSongs.addAll(fan.getLikedSongs().stream()
                                 .sorted(Comparator.comparingInt(Song::getLikes).reversed())
-                                .limit(5)
+                                .limit(topSize)
                                 .collect(Collectors.toCollection(ArrayList::new))
                         )
                 );
@@ -1400,13 +1480,14 @@ public final class AudioPlayer {
                 listener.setRecommendation(fansPlaylist);
                 listener.getPlaylistRecommendations().add(fansPlaylist);
             }
+            default -> { }
         }
         result.setMessage("The recommendations for user "
                 + listener.getUsername() + " have been updated successfully.");
         return result;
     }
 
-    private static int getFanListens(Listener listener, Artist artist) {
+    private static int getFanListens(final Listener listener, final Artist artist) {
         int listenCounter = 0;
         for (Map.Entry<Song, Integer> entry : listener.getSongListens().entrySet()) {
             if (entry.getKey().getArtist().equals(artist.getUsername())) {
@@ -1418,7 +1499,12 @@ public final class AudioPlayer {
     }
 
 
-    public GeneralResult previousPage(Command command) {
+    /**
+     * return to the previous page
+     * @param command the given command
+     * @return result formatted for output
+     */
+    public GeneralResult previousPage(final Command command) {
         GeneralResult result = new GeneralResult
                 .Builder(command.getCommand(), command.getTimestamp())
                 .username(command.getUsername())
@@ -1437,7 +1523,12 @@ public final class AudioPlayer {
         return result;
     }
 
-    public GeneralResult nextPage(Command command) {
+    /**
+     * return to the page before previousPage was called
+     * @param command the given command
+     * @return result formatted for output
+     */
+    public GeneralResult nextPage(final Command command) {
         GeneralResult result = new GeneralResult
                 .Builder(command.getCommand(), command.getTimestamp())
                 .username(command.getUsername())

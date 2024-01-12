@@ -1,4 +1,4 @@
-package app.results;
+package app.output.format_classes;
 
 import app.audio.Episode;
 import app.audio.Podcast;

@@ -1,9 +1,14 @@
 package app.audio;
 
+import app.output.results.EndResult;
+import app.output.results.GeneralResult;
+import app.output.results.GetTop5PlaylistsResult;
+import app.output.results.GetTop5SongsResult;
+import app.output.results.StatisticsResult;
+
 import app.persons.Artist;
 import app.persons.Host;
 import app.player.AudioPlayer;
-import app.results.*;
 import fileio.input.LibraryInput;
 import fileio.input.PodcastInput;
 import fileio.input.SongInput;
@@ -13,7 +18,11 @@ import main.Command;
 import app.persons.Listener;
 import app.persons.User;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Getter
@@ -267,9 +276,11 @@ public final class LibrarySingleton {
      * @param command the given command
      * @return the result formatted for output
      */
-    public GetAllUsersResult getAllUsers(final Command command) {
-        GetAllUsersResult result = new GetAllUsersResult();
-        result.setTimestamp(command.getTimestamp());
+    public GeneralResult getAllUsers(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .build();
+
         ArrayList<String> resultArray = result.getResult();
         for (Listener listener: listeners) {
             resultArray.add(listener.getUsername());
@@ -289,9 +300,11 @@ public final class LibrarySingleton {
      * @param command the given command
      * @return the result formatted for output
      */
-    public GetOnlineUsersResult getOnlineUsers(final Command command) {
-        GetOnlineUsersResult result = new GetOnlineUsersResult();
-        result.setTimestamp(command.getTimestamp());
+    public GeneralResult getOnlineUsers(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .build();
+
         ArrayList<String> resultArray = result.getResult();
         for (Listener listener: listeners) {
             if (listener.isOnline()) {
@@ -330,11 +343,13 @@ public final class LibrarySingleton {
      * @param command the given command
      * @return the result of the command formatted for output
      */
-    public AddUserResult addUser(final Command command) {
-        AddUserResult result = new AddUserResult();
+    public GeneralResult addUser(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
+
         AudioPlayer player = audioPlayers.get(command.getUsername());
-        result.setUser(command.getUsername());
-        result.setTimestamp(command.getTimestamp());
         if (usernameAlreadyExists(command.getUsername())) {
             result.setMessage("The username " + command.getUsername() + " is already taken.");
             return result;
@@ -362,6 +377,11 @@ public final class LibrarySingleton {
         return result;
     }
 
+    /**
+     * end program and give final statistics
+     * @param command the last command given (useful for the timestamp)
+     * @return result formatted for output
+     */
     public EndResult endProgram(final Command command) {
         EndResult result = new EndResult.Builder().build();
         for (Listener listener: listeners) {
@@ -381,22 +401,28 @@ public final class LibrarySingleton {
                 .filter(artist -> artist.getPlays() > 0 || artist.getMerchRevenue() > 0)
                 .sorted(
                         Comparator
-                                .<Artist>comparingDouble(artist -> artist.getMerchRevenue() + artist.getStreamsRevenue())
+                                .<Artist>comparingDouble(artist ->
+                                        artist.getMerchRevenue() + artist.getStreamsRevenue())
                                 .reversed()
                                 .thenComparing(Artist::getName)
                 )
                 .collect(Collectors.toCollection(ArrayList::new));
         int rank = 0;
+
+        // unfortunately java doesn't support 💯 as a variable name
+        final double hundredEmoji = 100.0;
         for (Artist artist: filteredArtists) {
             LinkedHashMap<String, Object> stats = new LinkedHashMap<>();
-            stats.put("songRevenue", Math.round(artist.getStreamsRevenue() * 100.0) / 100.0);
+            stats.put("songRevenue",
+                    Math.round(artist.getStreamsRevenue() * hundredEmoji) / hundredEmoji);
             stats.put("merchRevenue", artist.getMerchRevenue());
             stats.put("ranking", ++rank);
             stats.put("mostProfitableSong", artist.getSongProfits().entrySet().stream()
                     .filter(entry -> entry.getValue() != 0.0)
                     .max((entry1, entry2) -> {
                         int valueComparison = entry1.getValue().compareTo(entry2.getValue());
-                        return valueComparison != 0 ? valueComparison : entry2.getKey().compareTo(entry1.getKey());
+                        return valueComparison != 0 ? valueComparison
+                                : entry2.getKey().compareTo(entry1.getKey());
                     })
                     .map(Map.Entry::getKey)
                     .orElse("N/A"));

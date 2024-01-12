@@ -1,6 +1,5 @@
 package app.audio;
 
-import app.persons.Host;
 import app.persons.User;
 import fileio.input.EpisodeInput;
 import fileio.input.PodcastInput;

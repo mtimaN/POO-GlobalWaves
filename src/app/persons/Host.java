@@ -7,12 +7,16 @@ import app.player.Announcement;
 import app.player.AudioPlayer;
 import app.player.Filter;
 import app.player.Searchable;
-import app.results.WrappedResult;
+import app.output.results.WrappedResult;
 import fileio.input.UserInput;
 import lombok.Getter;
 import main.Command;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Getter
@@ -90,7 +94,8 @@ public final class Host extends User implements Searchable {
     }
 
     @Override
-    public WrappedResult wrapped(Command command) {
+    public WrappedResult wrapped(final Command command) {
+        final int topSize = 5;
         WrappedResult result = new WrappedResult.Builder(this)
                 .timestamp(command.getTimestamp())
                 .build();
@@ -118,7 +123,7 @@ public final class Host extends User implements Searchable {
         LinkedHashMap<String, Integer> top5Episodes = episodeListenCounts.entrySet().stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue(Comparator.reverseOrder())
                         .thenComparing(Map.Entry.comparingByKey()))
-                .limit(5)
+                .limit(topSize)
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         Map.Entry::getValue,

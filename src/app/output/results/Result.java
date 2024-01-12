@@ -1,4 +1,4 @@
-package app.results;
+package app.output.results;
 
 import lombok.Getter;
 

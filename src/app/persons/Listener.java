@@ -1,15 +1,30 @@
 package app.persons;
 
-import app.audio.*;
+import app.audio.AudioItem;
+import app.audio.Episode;
+import app.audio.LibrarySingleton;
+import app.audio.Playlist;
+import app.audio.Podcast;
+import app.audio.Song;
+
+import app.output.format_classes.PlaylistOutput;
+import app.output.results.GeneralResult;
+import app.output.results.ShowPlaylistsResult;
+import app.output.results.WrappedResult;
+
 import app.player.AudioPlayer;
 import app.player.Page;
-import app.results.*;
 import fileio.input.UserInput;
 import lombok.Getter;
 import lombok.Setter;
 import main.Command;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 import static java.util.Map.Entry;
@@ -94,10 +109,11 @@ public final class Listener extends User {
      * @param command the given command
      * @return result formatted for output
      */
-    public ShowPreferredSongsResult showPreferredSongs(final Command command) {
-        ShowPreferredSongsResult result = new ShowPreferredSongsResult();
-        result.setUser(command.getUsername());
-        result.setTimestamp(command.getTimestamp());
+    public GeneralResult showPreferredSongs(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
         for (Song song: likedSongs) {
             result.getResult().add(song.getName());
         }
@@ -124,10 +140,12 @@ public final class Listener extends User {
      * @param command the given command
      * @return the result formatted for output
      */
-    public SwitchVisibilityResult switchVisibility(final Command command) {
-        SwitchVisibilityResult result = new SwitchVisibilityResult();
-        result.setUser(command.getUsername());
-        result.setTimestamp(command.getTimestamp());
+    public GeneralResult switchVisibility(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
+
         if (command.getPlaylistId() > playlists.size()) {
             result.setMessage("The specified playlist ID is too high.");
             return result;
@@ -147,10 +165,11 @@ public final class Listener extends User {
      * @param command the given command
      * @return the current page, formatted for output
      */
-    public PrintCurrentPageResult printCurrentPage(final Command command) {
-        PrintCurrentPageResult result = new PrintCurrentPageResult();
-        result.setUser(getUsername());
-        result.setTimestamp(command.getTimestamp());
+    public GeneralResult printCurrentPage(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
 
         if (!isOnline()) {
             result.setMessage(getUsername() + " is offline.");
@@ -183,7 +202,7 @@ public final class Listener extends User {
                 if (((Playlist) player.getCurrentItem()).getOwner().equals(getUsername())) {
                     return getUsername() + " can't be deleted.";
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) { }
         }
         library.getListeners().remove(this);
         library.getAudioPlayers().remove(getUsername());
@@ -196,7 +215,12 @@ public final class Listener extends User {
         return getUsername() + " was successfully deleted.";
     }
 
-    public void addToSongListens(Song song, int listens) {
+    /**
+     * increase number of listens for given song
+     * @param song the given song
+     * @param listens the number of listens
+     */
+    public void addToSongListens(final Song song, final int listens) {
         Artist artist = LibrarySingleton.getInstance().findArtistByName(song.getArtist());
         if (artist != null) {
             artist.setPlays(artist.getPlays() + listens);
@@ -214,12 +238,18 @@ public final class Listener extends User {
         songListens.put(song, songListens.getOrDefault(song, 0) + listens);
     }
 
-    public void addToEpisodeListens(Episode episode, int listens) {
+    /**
+     * increase listen count for given episode
+     * @param episode the given episode
+     * @param listens the number of listens
+     */
+    public void addToEpisodeListens(final Episode episode, final int listens) {
         episodeListens.put(episode, episodeListens.getOrDefault(episode, 0) + listens);
     }
 
     @Override
-    public WrappedResult wrapped(Command command) {
+    public WrappedResult wrapped(final Command command) {
+        final int topSize = 5;
         WrappedResult result = new WrappedResult.Builder(this)
                 .timestamp(command.getTimestamp())
                 .build();
@@ -244,7 +274,7 @@ public final class Listener extends User {
         LinkedHashMap<String, Integer> top5Artists = artistListenCounts.entrySet().stream()
                 .sorted(Entry.<String, Integer>comparingByValue(Comparator.reverseOrder())
                         .thenComparing(Entry.comparingByKey()))
-                .limit(5)
+                .limit(topSize)
                 .collect(Collectors.toMap(
                         Entry::getKey,
                         Entry::getValue,
@@ -257,7 +287,7 @@ public final class Listener extends User {
         LinkedHashMap<String, Integer> top5Genres = genreListenCounts.entrySet().stream()
                 .sorted(Entry.<String, Integer>comparingByValue(Comparator.reverseOrder())
                         .thenComparing(Entry.comparingByKey()))
-                .limit(5)
+                .limit(topSize)
                 .collect(Collectors.toMap(
                         Entry::getKey,
                         Entry::getValue,
@@ -277,7 +307,7 @@ public final class Listener extends User {
                 .entrySet().stream()
                 .sorted(Entry.<String, Integer>comparingByValue(Comparator.reverseOrder())
                         .thenComparing(Entry.comparingByKey()))
-                .limit(5)
+                .limit(topSize)
                 .collect(Collectors.toMap(
                         Entry::getKey,
                         Entry::getValue,
@@ -290,7 +320,7 @@ public final class Listener extends User {
         LinkedHashMap<String, Integer> top5Albums = albumListenCounts.entrySet().stream()
                 .sorted(Entry.<String, Integer>comparingByValue(Comparator.reverseOrder())
                         .thenComparing(Entry.comparingByKey()))
-                .limit(5)
+                .limit(topSize)
                 .collect(Collectors.toMap(
                         Entry::getKey,
                         Entry::getValue,
@@ -302,8 +332,9 @@ public final class Listener extends User {
 
         Map<String, Integer> top5Episodes = episodeListens.entrySet().stream()
                 .sorted(Entry.<Episode, Integer>comparingByValue(Comparator.reverseOrder())
-                        .thenComparing(Entry.comparingByKey(Comparator.comparing(Episode::getName))))
-                .limit(5)
+                        .thenComparing(Entry.comparingByKey(Comparator
+                                .comparing(Episode::getName))))
+                .limit(topSize)
                 .collect(Collectors.toMap(
                         entry -> entry.getKey().getName(),
                         Entry::getValue,
@@ -315,9 +346,12 @@ public final class Listener extends User {
         return result;
     }
 
+    /**
+     * give the accumulated money to the listened artists
+     */
     public void splitMoney() {
-        HashMap<Song, Integer> songsRevenueShare = premium ?
-                premiumSongsRevenueShare : adsSongsRevenueShare;
+        HashMap<Song, Integer> songsRevenueShare = premium
+                ? premiumSongsRevenueShare : adsSongsRevenueShare;
         int revenueSongs = premium ? premiumRevenueSongs : adsRevenueSongs;
         songsRevenueShare.forEach((song, share) -> {
             double songRevenue = revenue * share / revenueSongs;
@@ -337,6 +371,9 @@ public final class Listener extends User {
         revenue = 0;
     }
 
+    /**
+     * @return true if the listener is subscribed to the page owner
+     */
     public boolean isSubscribedToPageOwner() {
         if (currentPage.getPageType() == Page.PageType.ARTIST) {
             Artist artist = (Artist) currentPage.getPageOwner();
@@ -347,6 +384,9 @@ public final class Listener extends User {
         }
     }
 
+    /**
+     * subscribe to the owner of the page
+     */
     public void subscribeToPageOwner() {
         if (currentPage.getPageType() == Page.PageType.ARTIST) {
             Artist artist = (Artist) currentPage.getPageOwner();
@@ -357,6 +397,9 @@ public final class Listener extends User {
         }
     }
 
+    /**
+     * unsubscribes from the owner of the page
+     */
     public void unsubscribeFromPageOwner() {
         if (currentPage.getPageType() == Page.PageType.ARTIST) {
             Artist artist = (Artist) currentPage.getPageOwner();

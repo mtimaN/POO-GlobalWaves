@@ -1,12 +1,11 @@
 package app.persons;
 
 import app.player.Notification;
-import app.results.WrappedResult;
+import app.output.results.WrappedResult;
 import fileio.input.UserInput;
 import lombok.Getter;
 import lombok.Setter;
 import main.Command;
-import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
 
@@ -52,5 +51,10 @@ public abstract class User {
      */
     public abstract String delete(Command command);
 
+    /**
+     * give statistics of the user's activity
+     * @param command the given command
+     * @return result formatted for output
+     */
     public abstract WrappedResult wrapped(Command command);
 }

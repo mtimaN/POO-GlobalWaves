@@ -1,4 +1,4 @@
-package app.results;
+package app.output.results;
 
 import app.persons.Artist;
 import app.persons.Host;
@@ -10,16 +10,16 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Getter @Setter
-public class WrappedResult extends Result {
+public final class WrappedResult extends Result {
     private String message;
     private Map<String, Object> result;
 
-    public static class Builder {
+    public static final class Builder {
         private int timestamp;
         private final String username;
         private String message = null;
         private Map<String, Object> result = null;
-        public Builder(Listener listener) {
+        public Builder(final Listener listener) {
             username = listener.getUsername();
             if (listener.getSongListens().isEmpty() && listener.getEpisodeListens().isEmpty()) {
                 message = "No data to show for user " + listener.getUsername() + ".";
@@ -28,7 +28,7 @@ public class WrappedResult extends Result {
             }
         }
 
-        public Builder(Artist artist) {
+        public Builder(final Artist artist) {
             username = artist.getUsername();
             if (artist.getAlbums().isEmpty()) {
                 message = "No data to show for artist " + artist.getUsername() + ".";
@@ -37,7 +37,7 @@ public class WrappedResult extends Result {
             }
         }
 
-        public Builder(Host host) {
+        public Builder(final Host host) {
             username = host.getUsername();
             if (host.getPodcasts().isEmpty()) {
                 message = "No data to show for host " + host.getUsername() + ".";
@@ -46,17 +46,19 @@ public class WrappedResult extends Result {
             }
         }
 
-        public Builder timestamp(int timestamp) {
-            this.timestamp = timestamp;
+        /** */
+        public Builder timestamp(final int givenTimestamp) {
+            this.timestamp = givenTimestamp;
             return this;
         }
 
+        /** */
         public WrappedResult build() {
             return new WrappedResult(this);
         }
     }
 
-    private WrappedResult(Builder builder) {
+    private WrappedResult(final Builder builder) {
         this.message = builder.message;
         this.result = builder.result;
         this.setTimestamp(builder.timestamp);

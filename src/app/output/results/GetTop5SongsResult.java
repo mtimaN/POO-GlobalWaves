@@ -1,18 +1,18 @@
-package app.results;
+package app.output.results;
 
 import lombok.Getter;
 
 import java.util.ArrayList;
 
 @Getter
-public final class GetTop5PlaylistsResult {
+public final class GetTop5SongsResult {
     private ArrayList<String> result;
     private String command;
     private int timestamp;
 
-    public GetTop5PlaylistsResult() {
+    public GetTop5SongsResult() {
         result = new ArrayList<>();
-        command = "getTop5Playlists";
+        command = "getTop5Songs";
     }
 
     public void setResult(final ArrayList<String> result) {

@@ -1,5 +1,6 @@
-package app.results;
+package app.output.results;
 
+import app.output.format_classes.PodcastOutput;
 import lombok.Getter;
 import lombok.Setter;
 

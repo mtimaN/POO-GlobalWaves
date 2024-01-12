@@ -1,5 +1,6 @@
-package app.results;
+package app.output.results;
 
+import app.output.format_classes.PlaylistOutput;
 import lombok.Getter;
 
 import java.util.ArrayList;

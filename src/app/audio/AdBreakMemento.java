@@ -6,16 +6,20 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class AdBreakMemento {
+public final class AdBreakMemento {
     private Status status;
     private AudioItem currentItem;
 
-    public AdBreakMemento(Status status, AudioItem currentItem) {
+    public AdBreakMemento(final Status status, final AudioItem currentItem) {
         this.status = status;
         this.currentItem = currentItem;
     }
 
-    public void revert(AudioPlayer player) {
+    /**
+     * revert the player to the initial state using memento
+     * @param player the given player
+     */
+    public void revert(final AudioPlayer player) {
         player.setStatus(status);
         player.setCurrentItem(currentItem);
     }

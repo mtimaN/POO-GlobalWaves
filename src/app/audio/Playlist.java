@@ -1,14 +1,13 @@
 package app.audio;
 
 import app.persons.User;
+import app.output.results.GeneralResult;
 import lombok.Getter;
 import lombok.Setter;
 import main.Command;
 import app.player.Filter;
 import app.persons.Listener;
-import app.results.CreatePlaylistResult;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 @Getter @Setter
@@ -17,7 +16,7 @@ public final class Playlist extends SongCollection {
     private String visibility;
     private final int timestamp;
 
-    public Playlist(String name, ArrayList<Song> songs) {
+    public Playlist(final String name, final ArrayList<Song> songs) {
         this.name = name;
         timestamp = -1;
         this.songs = songs;
@@ -39,16 +38,20 @@ public final class Playlist extends SongCollection {
     }
 
     /**
+     * creates a new playlist
      * @param command given command
      * @return result formatted for output
      */
-    public static CreatePlaylistResult create(final Command command) {
+    public static GeneralResult create(final Command command) {
         if (command.getPlaylistName() == null) {
             return null;
         }
-        CreatePlaylistResult result = new CreatePlaylistResult();
-        result.setTimestamp(command.getTimestamp());
-        result.setUser(command.getUsername());
+
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
+
         LibrarySingleton library = LibrarySingleton.getInstance();
         Listener listener = library.findListenerByUsername(command.getUsername());
         if (listener == null) {

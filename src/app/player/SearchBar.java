@@ -1,15 +1,14 @@
 package app.player;
 
-import app.audio.Album;
 import app.audio.LibrarySingleton;
 import app.audio.Playlist;
+import app.output.results.GeneralResult;
 import app.persons.Artist;
 import app.persons.Listener;
 import lombok.Getter;
 import lombok.Setter;
 import main.Command;
-import app.results.SearchResult;
-import app.results.SelectResult;
+import app.output.results.SearchResult;
 
 import java.util.ArrayList;
 
@@ -133,10 +132,11 @@ public final class SearchBar {
      * @param command the given command
      * @return the result formatted for output
      */
-    public SelectResult select(final Command command) {
-        SelectResult selectResult = new SelectResult();
-        selectResult.setUser(command.getUsername());
-        selectResult.setTimestamp(command.getTimestamp());
+    public GeneralResult select(final Command command) {
+        GeneralResult selectResult = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
         if (results == null) {
             selectResult.setMessage("Please conduct a search before making a selection.");
         } else if (command.getItemNumber() > results.size()) {

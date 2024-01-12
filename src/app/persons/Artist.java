@@ -9,15 +9,19 @@ import app.player.Merch;
 import app.player.Event;
 import app.player.Searchable;
 import app.player.Filter;
-import app.results.AlbumOutput;
-import app.results.ShowAlbumsResult;
-import app.results.WrappedResult;
+import app.output.format_classes.AlbumOutput;
+import app.output.results.ShowAlbumsResult;
+import app.output.results.WrappedResult;
 import fileio.input.UserInput;
 import lombok.Getter;
 import lombok.Setter;
 import main.Command;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Getter @Setter
@@ -148,7 +152,8 @@ public final class Artist extends User implements Searchable {
     }
 
     @Override
-    public WrappedResult wrapped(Command command) {
+    public WrappedResult wrapped(final Command command) {
+        final int topSize = 5;
         WrappedResult result = new WrappedResult.Builder(this)
                 .timestamp(command.getTimestamp())
                 .build();
@@ -157,7 +162,8 @@ public final class Artist extends User implements Searchable {
             return result;
         }
 
-        HashMap<String, AudioPlayer> audioPlayers = LibrarySingleton.getInstance().getAudioPlayers();
+        HashMap<String, AudioPlayer> audioPlayers =
+                LibrarySingleton.getInstance().getAudioPlayers();
         Map<String, Integer> albumListenCounts = new HashMap<>();
         Map<String, Integer> songListenCounts = new HashMap<>();
         Map<String, Integer> fansListenCounts = new HashMap<>();
@@ -188,7 +194,7 @@ public final class Artist extends User implements Searchable {
         LinkedHashMap<String, Integer> top5Albums = albumListenCounts.entrySet().stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue(Comparator.reverseOrder())
                         .thenComparing(Map.Entry.comparingByKey()))
-                .limit(5)
+                .limit(topSize)
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         Map.Entry::getValue,
@@ -201,7 +207,7 @@ public final class Artist extends User implements Searchable {
         LinkedHashMap<String, Integer> top5Songs = songListenCounts.entrySet().stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue(Comparator.reverseOrder())
                         .thenComparing(Map.Entry.comparingByKey()))
-                .limit(5)
+                .limit(topSize)
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         Map.Entry::getValue,
@@ -215,7 +221,7 @@ public final class Artist extends User implements Searchable {
         ArrayList<String> top5Fans = fansListenCounts.entrySet().stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue(Comparator.reverseOrder())
                         .thenComparing(Map.Entry.comparingByKey()))
-                .limit(5)
+                .limit(topSize)
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toCollection(ArrayList::new));
 

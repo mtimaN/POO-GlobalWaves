@@ -60,7 +60,7 @@ public abstract class SongCollection implements AudioItem {
                     }
                 }
                 case "Repeat All" -> player.setTrackId((id + 1) % songs.size());
-                case "Repeat Current Song" -> {}
+                default -> { }
             }
             if (status.getName().isEmpty()) {
                 player.setAdBreakMemento(new AdBreakMemento(status, null));

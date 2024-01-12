@@ -241,20 +241,28 @@ public final class Page {
         }
     }
 
+    /**
+     * take a snapshot of the page for memento
+     * @return the memento of the page
+     */
     public Memento takeSnapshot() {
         return new Memento(this.pageOwner, this.pageType);
     }
 
-    public void restore(Memento memento) {
+    /**
+     * restores the page using the memento
+     * @param memento the last snapshot of the object
+     */
+    public void restore(final Memento memento) {
         this.pageOwner = memento.pageOwner;
         this.pageType = memento.pageType;
     }
 
-    public static class Memento {
+    public static final class Memento {
         private final User pageOwner;
         private final PageType pageType;
 
-        private Memento(User pageOwner, PageType pageType) {
+        private Memento(final User pageOwner, final PageType pageType) {
             this.pageOwner = pageOwner;
             this.pageType = pageType;
         }
