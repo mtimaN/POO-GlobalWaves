@@ -571,6 +571,8 @@ public final class AudioPlayer {
                 .username(command.getUsername())
                 .build();
 
+        currentFile = updateStatus(command);
+
         Listener listener = (Listener) user;
         if (!listener.isOnline()) {
             result.setMessage(command.getUsername() + " is offline.");
