@@ -1,5 +1,6 @@
 package app.results;
 
+import app.player.Status;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,6 +13,7 @@ public class GeneralResult extends Result {
     private String message;
     private ArrayList<Notification> notifications;
     private ArrayList<String> result;
+    private Status stats;
 
     public static class Builder {
         private final int timestamp;
@@ -19,6 +21,7 @@ public class GeneralResult extends Result {
         private String message;
         private String command;
         private ArrayList<Notification> notifications;
+        private Status stats;
 
         private ArrayList<String> result;
 
@@ -38,6 +41,11 @@ public class GeneralResult extends Result {
 
         public Builder notifications() {
             notifications = new ArrayList<>();
+            return this;
+        }
+
+        public Builder stats(Status status) {
+            stats = status;
             return this;
         }
 

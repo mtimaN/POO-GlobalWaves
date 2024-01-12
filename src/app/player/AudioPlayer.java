@@ -50,14 +50,16 @@ public final class AudioPlayer {
     }
 
     /**
+     * loads the selected item into the player
      * @param command given command
      * @return result formatted for output
      */
-    public LoadResult load(final Command command) {
+    public GeneralResult load(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
         Listener listener = (Listener) user;
-        LoadResult result = new LoadResult();
-        result.setUser(command.getUsername());
-        result.setTimestamp(command.getTimestamp());
 
         if (searchBar.getSelection() == null || !searchBar.getSelection().isPlayable()) {
             result.setMessage("Please select a source before attempting to load.");
@@ -87,13 +89,15 @@ public final class AudioPlayer {
     }
 
     /**
+     * plays or pauses the audio
      * @param command given command
      * @return result formatted for output
      */
-    public PlayPauseResult playPause(final Command command) {
-        PlayPauseResult result = new PlayPauseResult();
-        result.setUser(command.getUsername());
-        result.setTimestamp(command.getTimestamp());
+    public GeneralResult playPause(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
 
         currentFile = updateStatus(command);
         if (currentItem == null) {
@@ -146,14 +150,15 @@ public final class AudioPlayer {
      * @param command given command
      * @return result formatted for output
      */
-    public StatusResult status(final Command command) {
+    public GeneralResult status(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
         if (user == null) {
             return null;
         }
 
-        StatusResult result = new StatusResult();
-        result.setUser(command.getUsername());
-        result.setTimestamp(command.getTimestamp());
         currentFile = updateStatus(command);
 
         if (currentFile == null) {
@@ -164,14 +169,16 @@ public final class AudioPlayer {
     }
 
     /**
+     * add or remove current song from playlist
      * @param command given command
      * @return result formatted for output
      */
-    public AddRemoveInPlaylistResult addRemoveInPlaylist(final Command command) {
+    public GeneralResult addRemoveInPlaylist(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
         Listener listener = (Listener) user;
-        AddRemoveInPlaylistResult result = new AddRemoveInPlaylistResult();
-        result.setUser(command.getUsername());
-        result.setTimestamp(command.getTimestamp());
 
         if (currentItem == null) {
             result.setMessage(
@@ -209,15 +216,17 @@ public final class AudioPlayer {
      * @param command given command
      * @return result formatted for output
      */
-    public LikeResult like(final Command command) {
+    public GeneralResult like(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
+
         Listener listener = (Listener) user;
         if (user == null) {
             return null;
         }
 
-        LikeResult result = new LikeResult();
-        result.setUser(command.getUsername());
-        result.setTimestamp(command.getTimestamp());
         if (!listener.isOnline()) {
             result.setMessage(user.getUsername() + " is offline.");
             return result;
@@ -251,14 +260,17 @@ public final class AudioPlayer {
     }
 
     /**
+     * switch the repeat status of the player
      * @param command given command
      * @return result formatted for output
      */
-    public RepeatResult repeat(final Command command) {
+    public GeneralResult repeat(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
+
         currentFile = updateStatus(command);
-        RepeatResult result = new RepeatResult();
-        result.setUser(command.getUsername());
-        result.setTimestamp(command.getTimestamp());
 
         if (currentItem == null) {
             result.setMessage("Please load a source before setting the repeat status.");
@@ -285,13 +297,15 @@ public final class AudioPlayer {
     }
 
     /**
+     * switch the shuffle status of the player
      * @param command given command
      * @return result formatted for output
      */
-    public ShuffleResult shuffle(final Command command) {
-        ShuffleResult result = new ShuffleResult();
-        result.setUser(command.getUsername());
-        result.setTimestamp(command.getTimestamp());
+    public GeneralResult shuffle(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
 
         currentFile = updateStatus(command);
         if (currentItem == null) {
@@ -313,14 +327,16 @@ public final class AudioPlayer {
     }
 
     /**
+     * skip forwardSize seconds from the audio
      * @param command given command
      * @return result formatted for output
      */
-    public ForwardResult forward(final Command command) {
+    public GeneralResult forward(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
         final int forwardSize = 90;
-        ForwardResult result = new ForwardResult();
-        result.setUser(command.getUsername());
-        result.setTimestamp(command.getTimestamp());
         currentFile = updateStatus(command);
 
         if (currentItem == null) {
@@ -337,14 +353,17 @@ public final class AudioPlayer {
     }
 
     /**
+     * go back backwardSize seconds
      * @param command given command
      * @return result formatted for output
      */
-    public BackwardResult backward(final Command command) {
+    public GeneralResult backward(final Command command) {
         final int backwardSize = 90;
-        BackwardResult result = new BackwardResult();
-        result.setUser(command.getUsername());
-        result.setTimestamp(command.getTimestamp());
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
+
         currentFile = updateStatus(command);
 
         if (currentFile == null) {
@@ -363,13 +382,15 @@ public final class AudioPlayer {
     }
 
     /**
+     * skip to the next audio file
      * @param command given command
      * @return result formatted for output
      */
-    public NextResult next(final Command command) {
-        NextResult result = new NextResult();
-        result.setUser(command.getUsername());
-        result.setTimestamp(command.getTimestamp());
+    public GeneralResult next(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
         currentFile = updateStatus(command);
 
         if (currentFile == null) {
@@ -416,10 +437,12 @@ public final class AudioPlayer {
      * @param command given command
      * @return result formatted for output
      */
-    public PrevResult prev(final Command command) {
-        PrevResult result = new PrevResult();
-        result.setUser(command.getUsername());
-        result.setTimestamp(command.getTimestamp());
+    public GeneralResult prev(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
+
         currentFile = updateStatus(command);
 
         if (currentFile == null) {
@@ -463,36 +486,40 @@ public final class AudioPlayer {
      * @param command given command
      * @return result formatted for output
      */
-    public FollowResult follow(final Command command) {
-        FollowResult result = new FollowResult();
-        result.setUser(command.getUsername());
-        result.setTimestamp(command.getTimestamp());
+    public GeneralResult follow(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
         if (searchBar.getSelection() == null) {
             result.setMessage("Please select a source before following or unfollowing.");
             return result;
         }
 
+        Playlist playlist;
+
         try {
-            Playlist playlist = (Playlist) searchBar.getSelection();
-            if (playlist.getOwner().equals(command.getUsername())) {
-                result.setMessage("You cannot follow or unfollow your own playlist.");
-                return result;
-            }
-            ArrayList<Listener> followers = playlist.getFollowers();
-            for (Listener follower : followers) {
-                if (user.equals(follower)) {
-                    result.setMessage("Playlist unfollowed successfully.");
-                    followers.remove(follower);
-                    return result;
-                }
-            }
-            result.setMessage("Playlist followed successfully.");
-            followers.add((Listener) user);
-            return result;
+            playlist = (Playlist) searchBar.getSelection();
         } catch (Exception e) {
             result.setMessage("The selected source is not a playlist.");
             return result;
         }
+
+        if (playlist.getOwner().equals(command.getUsername())) {
+            result.setMessage("You cannot follow or unfollow your own playlist.");
+            return result;
+        }
+        ArrayList<Listener> followers = playlist.getFollowers();
+        for (Listener follower : followers) {
+            if (user.equals(follower)) {
+                result.setMessage("Playlist unfollowed successfully.");
+                followers.remove(follower);
+                return result;
+            }
+        }
+        result.setMessage("Playlist followed successfully.");
+        followers.add((Listener) user);
+        return result;
     }
 
 
@@ -502,10 +529,11 @@ public final class AudioPlayer {
      * @param command the given command
      * @return formatted output
      */
-    public ChangePageResult changePage(final Command command) {
-        ChangePageResult result = new ChangePageResult();
-        result.setUser(command.getUsername());
-        result.setTimestamp(command.getTimestamp());
+    public GeneralResult changePage(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
         if (user == null) {
             return null;
         }
@@ -603,11 +631,13 @@ public final class AudioPlayer {
      * @param command the given command
      * @return formatted output
      */
-    public SwitchConnectionStatusResult switchConnectionStatus(final Command command) {
+    public GeneralResult switchConnectionStatus(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
+
         currentFile = updateStatus(command);
-        SwitchConnectionStatusResult result = new SwitchConnectionStatusResult();
-        result.setUser(command.getUsername());
-        result.setTimestamp(command.getTimestamp());
 
         if (user == null) {
             result.setMessage("The username " + command.getUsername() + " doesn't exist.");
@@ -637,10 +667,11 @@ public final class AudioPlayer {
      * @param command the given command
      * @return formatted output
      */
-    public AddAlbumResult addAlbum(final Command command) {
-        AddAlbumResult result = new AddAlbumResult();
-        result.setUser(command.getUsername());
-        result.setTimestamp(command.getTimestamp());
+    public GeneralResult addAlbum(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
 
         if (user == null) {
             result.setMessage("The username " + command.getUsername() + " doesn't exist.");
@@ -707,10 +738,11 @@ public final class AudioPlayer {
      * @param command the given command
      * @return formatted output
      */
-    public AddEventResult addEvent(final Command command) {
-        AddEventResult result = new AddEventResult();
-        result.setTimestamp(command.getTimestamp());
-        result.setUser(command.getUsername());
+    public GeneralResult addEvent(final Command command) {
+        GeneralResult result = new GeneralResult
+                .Builder(command.getCommand(), command.getTimestamp())
+                .username(command.getUsername())
+                .build();
 
         if (user == null) {
             result.setMessage("The username " + command.getUsername() + " doesn't exist.");
