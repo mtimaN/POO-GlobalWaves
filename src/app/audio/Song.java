@@ -97,7 +97,20 @@ public final class Song extends AudioFile implements AudioItem {
         Status status = player.getStatus();
         Listener listener = (Listener) player.getUser();
 
-        if (status.getName().equals(name) && !name.equals("Ad Break")) {
+        if (getName().equals("Ad Break")) {
+            listener.splitMoney();
+            if (time >= getDuration()) {
+                player.getAdBreakMemento().revert(player);
+                player.setElapsedTime(player.getElapsedTime() - getDuration());
+                return (Song)player.updateStatus(command);
+            } else {
+                time -= getDuration();
+                status.setRemainedTime(-time);
+                return this;
+            }
+        }
+
+        if (status.getName().equals(name)) {
             listener.addToSongListens(this, -1);
         }
 
@@ -112,19 +125,6 @@ public final class Song extends AudioFile implements AudioItem {
             player.setAdBreakNext(false);
             player.setCurrentItem(LibrarySingleton.getInstance().findSongByName("Ad Break"));
             return (Song)player.updateStatus(command);
-        }
-
-        if (getName().equals("Ad Break")) {
-            listener.splitMoney();
-            if (time >= getDuration()) {
-                player.getAdBreakMemento().revert(player);
-                player.setElapsedTime(player.getElapsedTime() - getDuration());
-                return (Song)player.updateStatus(command);
-            } else {
-                time -= getDuration();
-                status.setRemainedTime(-time);
-                return this;
-            }
         }
 
         if (player.getStatus().getRepeat().equals("Repeat Once")) {

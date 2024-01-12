@@ -22,10 +22,12 @@ public final class Listener extends User {
     private final HashMap<Podcast, Integer> podcastListenTime;
     private final HashMap<Song, Integer> songListens;
     private final HashMap<Episode, Integer> episodeListens;
-    private HashMap<Song, Integer> songsRevenueShare;
+    private HashMap<Song, Integer> premiumSongsRevenueShare;
+    private HashMap<Song, Integer> adsSongsRevenueShare;
     private ArrayList<String> boughtMerch;
     private double revenue;
-    private int revenueSongs;
+    private int premiumRevenueSongs;
+    private int adsRevenueSongs;
     private boolean online;
     private Page currentPage;
     private boolean premium;
@@ -39,13 +41,19 @@ public final class Listener extends User {
         super(command);
         playlists = new ArrayList<>();
         likedSongs = new ArrayList<>();
+
         podcastListenTime = new HashMap<>();
         songListens = new HashMap<>();
         episodeListens = new HashMap<>();
-        songsRevenueShare = new HashMap<>();
+        premiumSongsRevenueShare = new HashMap<>();
+        adsSongsRevenueShare = new HashMap<>();
+        premiumRevenueSongs = 0;
+        adsRevenueSongs = 0;
+
         boughtMerch = new ArrayList<>();
         songRecommendations = new ArrayList<>();
         playlistRecommendations = new ArrayList<>();
+
         previousPages = new Stack<>();
         nextPages = new Stack<>();
         online = true;
@@ -56,13 +64,19 @@ public final class Listener extends User {
         super(input);
         this.playlists = new ArrayList<>();
         this.likedSongs = new ArrayList<>();
+
         podcastListenTime = new HashMap<>();
         songListens = new HashMap<>();
         episodeListens = new HashMap<>();
-        songsRevenueShare = new HashMap<>();
+        premiumSongsRevenueShare = new HashMap<>();
+        adsSongsRevenueShare = new HashMap<>();
+        premiumRevenueSongs = 0;
+        adsRevenueSongs = 0;
+
         boughtMerch = new ArrayList<>();
         songRecommendations = new ArrayList<>();
         playlistRecommendations = new ArrayList<>();
+
         previousPages = new Stack<>();
         nextPages = new Stack<>();
         online = true;
@@ -187,8 +201,15 @@ public final class Listener extends User {
         if (artist != null) {
             artist.setPlays(artist.getPlays() + listens);
         }
-        revenueSongs += listens;
-        songsRevenueShare.put(song, songsRevenueShare.getOrDefault(song, 0) + listens);
+        if (premium) {
+            premiumSongsRevenueShare
+                    .put(song, premiumSongsRevenueShare.getOrDefault(song, 0) + listens);
+            premiumRevenueSongs += listens;
+        } else {
+            adsSongsRevenueShare
+                    .put(song, adsSongsRevenueShare.getOrDefault(song, 0) + listens);
+            adsRevenueSongs += listens;
+        }
 
         songListens.put(song, songListens.getOrDefault(song, 0) + listens);
     }
@@ -295,19 +316,25 @@ public final class Listener extends User {
     }
 
     public void splitMoney() {
-        for (Map.Entry<Song, Integer> entry: songsRevenueShare.entrySet()) {
-            Song song = entry.getKey();
-            double songRevenue = revenue * entry.getValue() / revenueSongs;
+        HashMap<Song, Integer> songsRevenueShare = premium ?
+                premiumSongsRevenueShare : adsSongsRevenueShare;
+        int revenueSongs = premium ? premiumRevenueSongs : adsRevenueSongs;
+        songsRevenueShare.forEach((song, share) -> {
+            double songRevenue = revenue * share / revenueSongs;
             Artist artist = LibrarySingleton.getInstance().findArtistByName(song.getArtist());
-            if (artist == null) {
-                continue;
+
+            if (artist != null) {
+                artist.getSongProfits().merge(song.getName(), songRevenue, Double::sum);
             }
-            artist.getSongProfits().put(song.getName(), artist.getSongProfits().getOrDefault(song.getName(), 0.0)
-                    + songRevenue);
+        });
+        songsRevenueShare.clear();
+
+        if (premium) {
+            premiumRevenueSongs = 0;
+        } else {
+            adsRevenueSongs = 0;
         }
-        songsRevenueShare = new HashMap<>();
         revenue = 0;
-        revenueSongs = 0;
     }
 
     public boolean isSubscribedToPageOwner() {

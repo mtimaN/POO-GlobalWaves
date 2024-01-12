@@ -1133,7 +1133,6 @@ public final class AudioPlayer {
             return result;
         }
 
-        listener.splitMoney();
         listener.setPremium(true);
         listener.setRevenue(1e6);
         result.setMessage(command.getUsername() + " bought the subscription successfully.");
