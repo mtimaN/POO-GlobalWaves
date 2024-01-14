@@ -63,9 +63,9 @@ public abstract class SongCollection implements AudioItem {
                 default -> { }
             }
             if (status.getName().isEmpty()) {
-                player.setAdBreakMemento(new AdBreakMemento(status, null));
+                player.setMemento(new AudioPlayer.Memento(status, null));
             } else {
-                player.setAdBreakMemento(new AdBreakMemento(status, this));
+                player.setMemento(player.takeSnapshot());
             }
             player.setStatus(new Status());
             player.getStatus().empty();

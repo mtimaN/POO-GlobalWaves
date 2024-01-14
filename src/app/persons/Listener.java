@@ -31,10 +31,10 @@ import static java.util.Map.Entry;
 
 @Getter @Setter
 public final class Listener extends User {
-
     private final ArrayList<Playlist> playlists;
     private final ArrayList<Song> likedSongs;
     private final HashMap<Podcast, Integer> podcastListenTime;
+
     private final HashMap<Song, Integer> songListens;
     private final HashMap<Episode, Integer> episodeListens;
     private HashMap<Song, Integer> premiumSongsRevenueShare;
@@ -43,12 +43,16 @@ public final class Listener extends User {
     private double revenue;
     private int premiumRevenueSongs;
     private int adsRevenueSongs;
+
     private boolean online;
     private Page currentPage;
+
     private boolean premium;
+
     private ArrayList<Song> songRecommendations;
     private ArrayList<Playlist> playlistRecommendations;
     private AudioItem recommendation;
+
     private Stack<Page.Memento> previousPages;
     private Stack<Page.Memento> nextPages;
 

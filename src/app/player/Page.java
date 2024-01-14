@@ -258,6 +258,7 @@ public final class Page {
         this.pageType = memento.pageType;
     }
 
+    @Getter
     public static final class Memento {
         private final User pageOwner;
         private final PageType pageType;
@@ -265,14 +266,6 @@ public final class Page {
         private Memento(final User pageOwner, final PageType pageType) {
             this.pageOwner = pageOwner;
             this.pageType = pageType;
-        }
-
-        private User getSavedOwner() {
-            return pageOwner;
-        }
-
-        private PageType getSavedPageType() {
-            return pageType;
         }
     }
 }

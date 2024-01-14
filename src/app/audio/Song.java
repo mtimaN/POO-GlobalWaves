@@ -100,7 +100,7 @@ public final class Song extends AudioFile implements AudioItem {
         if (getName().equals("Ad Break")) {
             listener.splitMoney();
             if (time >= getDuration()) {
-                player.getAdBreakMemento().revert(player);
+                player.restore();
                 player.setElapsedTime(player.getElapsedTime() - getDuration());
                 return (Song) player.updateStatus(command);
             } else {
@@ -117,7 +117,7 @@ public final class Song extends AudioFile implements AudioItem {
         if (player.isAdBreakNext() && time >= getDuration()) {
             player.setElapsedTime(player.getElapsedTime() - getDuration());
             listener.addToSongListens(this, 1);
-            player.setAdBreakMemento(new AdBreakMemento(status, player.getCurrentItem()));
+            player.setMemento(player.takeSnapshot());
             player.setStatus(new Status());
             player.getStatus().empty();
             player.getStatus().setPaused(false);

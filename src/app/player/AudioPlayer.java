@@ -1,6 +1,5 @@
 package app.player;
 
-import app.audio.AdBreakMemento;
 import app.audio.Album;
 import app.audio.AudioFile;
 import app.audio.AudioItem;
@@ -46,7 +45,7 @@ public final class AudioPlayer {
     private int trackId;
     private int seed;
     private boolean adBreakNext;
-    private AdBreakMemento adBreakMemento;
+    private Memento memento;
 
     public AudioPlayer(final Command command) {
         user = LibrarySingleton.getInstance().findUserByUsername(command.getUsername());
@@ -1249,6 +1248,34 @@ public final class AudioPlayer {
         listener.setPremium(false);
         result.setMessage(command.getUsername() + " cancelled the subscription successfully.");
         return result;
+    }
+
+
+    /**
+     * take a snapshot of the player
+     * @return a new memento of the current state
+     */
+    public Memento takeSnapshot() {
+        return new Memento(status, currentItem);
+    }
+
+    /**
+     * restore the player to the memento value
+     */
+    public void restore() {
+        status = memento.getStatus();
+        currentItem = memento.getCurrentItem();
+    }
+
+    @Getter
+    public static final class Memento {
+        private final Status status;
+        private final AudioItem currentItem;
+
+        public Memento(final Status status, final AudioItem currentItem) {
+            this.status = status;
+            this.currentItem = currentItem;
+        }
     }
 
     /**
